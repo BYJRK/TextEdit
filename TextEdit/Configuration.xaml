@@ -1,7 +1,7 @@
 ﻿<Window x:Class="TextEdit.Configuration"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Height="330" Width="270" WindowStyle="ToolWindow" Title="配置" 
-        ScrollViewer.HorizontalScrollBarVisibility="Auto" ResizeMode="CanResize" Closed="Window_Closed"
+        ScrollViewer.HorizontalScrollBarVisibility="Auto" ResizeMode="CanResize" Closed="Window_Closed" FontFamily="Microsoft Yahei"
         MinWidth="270" MaxWidth="270" MinHeight="300">
     <Window.Resources>
         <RoutedUICommand x:Key="EscapeCommand"/>

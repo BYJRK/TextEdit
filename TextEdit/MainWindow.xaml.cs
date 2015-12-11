@@ -1283,6 +1283,7 @@ namespace TextEdit
         public PairExchangeReader reader = new PairExchangeReader();
         private void LoadTransformLists()
         {
+            CheckFolderExist();
             // 每次读取时，先清空原有列表的内容
             SymbolList.Items.Clear();
             pairList.Clear();
@@ -1334,6 +1335,14 @@ namespace TextEdit
             else
             {
                 System.Diagnostics.Process.Start(filePath);
+            }
+        }
+        private void CheckFolderExist()
+        {
+            if (!Directory.Exists("PairExchange"))
+            {
+                MessageBox.Show("PairExchange文件夹不存在，自动创建新的文件夹。");
+                Directory.CreateDirectory(Environment.CurrentDirectory + @"\PairExchange");
             }
         }
 
