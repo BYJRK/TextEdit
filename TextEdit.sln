@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextEdit", "TextEdit\TextEdit.csproj", "{B6A97798-4D56-4283-8C5F-CE4C5E7A6603}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordEdit", "WordEdit\WordEdit.csproj", "{2B547B3B-0976-4DD2-9D14-C43911C9DA94}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B6A97798-4D56-4283-8C5F-CE4C5E7A6603}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6A97798-4D56-4283-8C5F-CE4C5E7A6603}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6A97798-4D56-4283-8C5F-CE4C5E7A6603}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6A97798-4D56-4283-8C5F-CE4C5E7A6603}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B547B3B-0976-4DD2-9D14-C43911C9DA94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B547B3B-0976-4DD2-9D14-C43911C9DA94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B547B3B-0976-4DD2-9D14-C43911C9DA94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B547B3B-0976-4DD2-9D14-C43911C9DA94}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
