@@ -147,13 +147,13 @@ namespace WordEdit
         }
 
         /// <summary>
-        /// 使用正则表达式
+        /// 使用正则表达式，并保留匹配到的内容
         /// </summary>
         /// <param name="origin">原文本</param>
         /// <param name="from">被替换内容</param>
         /// <param name="to">替换为</param>
-        /// <param name="options">正则表达式选项</param>
         /// <param name="content">匹配到的内容（用换行符分开）</param>
+        /// <param name="options">正则表达式选项</param>
         /// <returns></returns>
         public string UseRegExp(string origin, string from, string to, out string content,
             RegexOptions options = RegexOptions.None)
@@ -180,6 +180,43 @@ namespace WordEdit
                 }
 
                 temp = r.Replace(temp, to);
+                return temp;
+            }
+            catch (Exception)
+            {
+                return origin;
+            }
+        }
+
+        /// <summary>
+        /// 使用正则表达式，仅获取匹配的内容，不替换
+        /// </summary>
+        /// <param name="origin">原文本</param>
+        /// <param name="matching">查找的内容</param>
+        /// <param name="content">匹配到的内容</param>
+        /// <param name="options">正则表达式选项</param>
+        /// <returns></returns>
+        public string UseRegExp(string origin, string matching, out string content,
+            RegexOptions options = RegexOptions.None)
+        {
+            content = string.Empty;
+            
+            string temp = origin;
+            try
+            {
+                Regex r = new Regex(matching, options);
+                
+                MatchCollection mc = r.Matches(temp);
+                if (mc.Count > 0)
+                {
+                    StringBuilder sb = new StringBuilder(mc[0].ToString());
+                    for (int i = 1; i < mc.Count; i++)
+                    {
+                        sb.Append(NL);
+                        sb.Append(mc[i].ToString());
+                    }
+                    content = sb.ToString();
+                }
                 return temp;
             }
             catch (Exception)

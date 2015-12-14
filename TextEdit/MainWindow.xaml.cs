@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using Microsoft.International.Converters.PinYinConverter;
 using System.Windows.Input;
 using WordEdit;
+using System.Reflection;
 
 namespace TextEdit
 {
@@ -246,7 +247,9 @@ namespace TextEdit
             sl.IsChecked = false;
             ib.IsChecked = false;
             vc.IsChecked = false;
+            ReplaceOnly.IsChecked = true;
             ShowMatch.IsChecked = false;
+            ShowMatchAndReplace.IsChecked = false;
             // 文件重命名 由于功能要求，不能清空此项的内容
             // 剪贴板辅助工具
             PasteCycle.IsChecked = false;
@@ -538,13 +541,17 @@ namespace TextEdit
         }
         private void DoUseRegExp(ref string T1, ref string T2)
         {
-            if (!ShowMatch.IsChecked.Value)
+            if (ReplaceOnly.IsChecked.Value)
             {
                 T1 = f.UseRegExp(Text1, RexFrom.Text, RexTo.Text, GetRexOptions());
             }
-            else
+            else if (ShowMatchAndReplace.IsChecked.Value)
             {
                 T1 = f.UseRegExp(Text1, RexFrom.Text, RexTo.Text, out T2, GetRexOptions());
+            }
+            else if (ShowMatch.IsChecked.Value)
+            {
+                T2 = f.UseRegExp(Text1, RexFrom.Text, out T2, GetRexOptions());
             }
         }
         private void DoTransformList(ref string T1)
@@ -694,7 +701,7 @@ namespace TextEdit
 
         // 程序中自定义的快捷键
         #region ShortcutSettings
-        
+
         void OpenFileShortcutExecuted(object sender, ExecutedRoutedEventArgs e)
         {
             打开MenuItem_Click(this, null);
@@ -886,10 +893,7 @@ namespace TextEdit
             {
                 MessageBox.Show("未找到配置文件。默认配置文件已创建。", "提示", MessageBoxButton.OK);
 
-                StreamWriter writer = new StreamWriter(filePath);
-                WriteInitialConfig(writer);
-                writer.Close();
-                writer.Dispose();
+                WriteInitialConfig(filePath);
             }
 
             XmlDocument doc = new XmlDocument();
@@ -957,11 +961,7 @@ namespace TextEdit
             if (!File.Exists(filePath))
             {
                 MessageBox.Show("未找到配置文件。默认配置文件已创建。", "提示", MessageBoxButton.OK);
-                using (StreamWriter writer = new StreamWriter(filePath))
-                {
-                    WriteInitialConfig(writer);
-                    writer.Close();
-                }
+                WriteInitialConfig(filePath);
             }
 
             XmlDocument doc = new XmlDocument();
@@ -1006,9 +1006,16 @@ namespace TextEdit
 
             doc.Save(filePath);
         }
-        private void WriteInitialConfig(StreamWriter writer)
+        private void WriteInitialConfig(string path)
         {
-            writer.Write(Properties.Resources.InitialConfig);
+            Stream sm = Assembly.GetExecutingAssembly().GetManifestResourceStream("TextEdit.config.xml");
+            StreamWriter sw = new StreamWriter(path);
+            StreamReader sr = new StreamReader(sm);
+            sw.Write(sr.ReadToEnd());
+            //sw.Write(Properties.Resources.InitialConfig); 以前使用的是Resources，2.5.1版本改用嵌入的资源
+            sw.Close();
+            sw.Dispose();
+            sr.Dispose();
         }
         // 设置文本框的颜色
         private string Color = "白色";
@@ -1157,7 +1164,7 @@ namespace TextEdit
                 isUsingBox2 = true;
                 UpdateDisplay();
             }
-            else if (r.Name == "Rex" && ShowMatch.IsChecked.Value)
+            else if (r.Name == "Rex" && (ShowMatch.IsChecked.Value || ShowMatchAndReplace.IsChecked.Value))
             {
                 isUsingBox2 = true;
                 UpdateDisplay();
@@ -1215,6 +1222,29 @@ namespace TextEdit
         private void CheckBoxUseBox2_Unchecked(object sender, RoutedEventArgs e)
         {
             isUsingBox2 = false;
+            UpdateDisplay();
+        }
+        // 正则表达式功能中的CheckBox用这个event
+        private void RexCheckBoxUseBox2_Checked(object sender, RoutedEventArgs e)
+        {
+            RadioButton rb = (RadioButton)sender;
+            switch (rb.Name)
+            {
+                case "ReplaceOnly": isUsingBox2 = false; break;
+                case "ShowMatch": isUsingBox2 = true; RexSecondTextBox.Visibility = Visibility.Collapsed; break;
+                case "ShowMatchAndReplace": isUsingBox2 = true; break;
+                default: /* 这怎么可能？ */ break;
+            }
+            UpdateDisplay();
+        }
+        private void RexCheckBoxUseBox2_UnChecked(object sender, RoutedEventArgs e)
+        {
+            RadioButton rb = (RadioButton)sender;
+            switch (rb.Name)
+            {
+                case "ShowMatch": isUsingBox2 = true; RexSecondTextBox.Visibility = Visibility.Visible; break;
+                default: /* 这怎么可能？ */ break;
+            }
             UpdateDisplay();
         }
 

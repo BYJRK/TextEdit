@@ -76,30 +76,30 @@
         <Border Grid.ColumnSpan="3" BorderThickness="0,0,0,2" BorderBrush="#0066CC" Panel.ZIndex="1">
             <Grid>
                 <!--菜单栏-->
-                <Menu Margin="4,4" FontSize="16px" Width="Auto" HorizontalAlignment="Left">
+                <Menu Margin="4,4" FontSize="16px" Width="Auto" HorizontalAlignment="Left" FontFamily="Microsoft Yahei">
                     <Menu.Background>
                         <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ControlColorKey}}"/>
                     </Menu.Background>
                     <MenuItem Header="文件">
-                        <MenuItem Header="打开(O)" Click="打开MenuItem_Click" Margin="0,2"/>
-                        <MenuItem Header="打开文件目录" Click="文件目录MenuItem_Click" Margin="0,2"/>
-                        <MenuItem Header="关闭(Alt+F4)" Click="关闭MenuItem_Click" Margin="0,2"/>
+                        <MenuItem Header="打开(O)" Click="打开MenuItem_Click" Margin="0,1"/>
+                        <MenuItem Header="打开文件目录" Click="文件目录MenuItem_Click" Margin="0,1"/>
+                        <MenuItem Header="关闭(Alt+F4)" Click="关闭MenuItem_Click" Margin="0,1"/>
                     </MenuItem>
                     <MenuItem Header="设置">
                         <MenuItem Header="文本框颜色" Margin="0,2">
-                            <MenuItem Header="绿色" Click="SetColor" Background="#FFCAFFCA" Margin="0,2"/>
-                            <MenuItem Header="红色" Click="SetColor" Background="#FFFFCACA" Margin="0,2"/>
-                            <MenuItem Header="蓝色" Click="SetColor" Background="#FFCACAFF" Margin="0,2"/>
-                            <MenuItem Header="黄色" Click="SetColor" Background="#FFFFFFCA" Margin="0,2"/>
-                            <MenuItem Header="黑色" Click="SetColor" Background="#FF000000" Foreground="#FFFFFFFF" Margin="0,2"/>
-                            <MenuItem Header="白色" Click="SetColor" Background="#FFFFFFFF" Margin="0,2"/>
+                            <MenuItem Header="绿色" Click="SetColor" Background="#FFCAFFCA" Margin="0,1"/>
+                            <MenuItem Header="红色" Click="SetColor" Background="#FFFFCACA" Margin="0,1"/>
+                            <MenuItem Header="蓝色" Click="SetColor" Background="#FFCACAFF" Margin="0,1"/>
+                            <MenuItem Header="黄色" Click="SetColor" Background="#FFFFFFCA" Margin="0,1"/>
+                            <MenuItem Header="黑色" Click="SetColor" Background="#FF000000" Foreground="#FFFFFFFF" Margin="0,1"/>
+                            <MenuItem Header="白色" Click="SetColor" Background="#FFFFFFFF" Margin="0,1"/>
                         </MenuItem>
-                        <MenuItem Header="选项(G)" Click="选项MenuItem_Click" Margin="0,2"/>
-                        <MenuItem Header="恢复默认位置" Click="InitSizeMenuItem_Click" Margin="0,2"/>
-                        <MenuItem Header="重置功能列表(R)" Click="InitFuncMenuItem_Click" Margin="0,2"/>
+                        <MenuItem Header="选项(G)" Click="选项MenuItem_Click" Margin="0,1"/>
+                        <MenuItem Header="恢复默认位置" Click="InitSizeMenuItem_Click" Margin="0,1"/>
+                        <MenuItem Header="重置功能列表(R)" Click="InitFuncMenuItem_Click" Margin="0,1"/>
                         <Separator/>
-                        <MenuItem Header="帮助(F1)" Click="帮助MenuItem_Click" Margin="0,2" Name="HelpMenuItem"/>
-                        <MenuItem Header="版本信息" Click="帮助MenuItem_Click" Margin="0,2"/>
+                        <MenuItem Header="帮助(F1)" Click="帮助MenuItem_Click" Margin="0,1" Name="HelpMenuItem"/>
+                        <MenuItem Header="版本信息" Click="帮助MenuItem_Click" Margin="0,1"/>
                     </MenuItem>
                     <MenuItem x:Name="wordCount" Header="字数统计" HorizontalAlignment="Center" Click="统计MenuItem_Click"/>
                 </Menu>
@@ -236,6 +236,7 @@
                         <ComboBox x:Name="SymbolList" Margin="10,5" HorizontalAlignment="Stretch" VerticalContentAlignment="Center">
                         </ComboBox>
                         <CheckBox x:Name="SymbolDirect" Margin="10" Content="反向替换"/>
+                        <Separator/>
                         <Button Content="更新转换列表" Click="UpdatePairList" Style="{StaticResource LeftButtonStyle}"/>
                         <Button Content="显示列表内容" Click="ShowPairList" Style="{StaticResource LeftButtonStyle}"/>
                         <Button Content="打开列表文件" Click="OpenPairFile" Style="{StaticResource LeftButtonStyle}"/>
@@ -284,18 +285,26 @@
                     <RadioButton x:Name="Rex" Content="正则表达式" Style="{StaticResource RadioStyle}" Checked="RadioButton_Checked" 
                                      Unchecked="RadioButton_Unchecked"/>
                     <StackPanel x:Name="gRex" Style="{StaticResource ChildPanel}">
+                        <TextBlock Text="匹配内容" HorizontalAlignment="Center" Margin="0,5,0,0"/>
                         <TextBox x:Name="RexFrom" Margin="5" FontSize="15px" TextWrapping="Wrap" AcceptsReturn="True"
                                      GotFocus="LeftTextBox_Focused"/>
-                        <TextBlock Text="替换为" HorizontalAlignment="Center"/>
-                        <TextBox x:Name="RexTo" Margin="5" FontSize="15px" TextWrapping="Wrap" AcceptsReturn="True" 
+                        <StackPanel x:Name="RexSecondTextBox" Orientation="Vertical">
+                            <TextBlock Text="替换为" HorizontalAlignment="Center"/>
+                            <TextBox x:Name="RexTo" Margin="5" FontSize="15px" TextWrapping="Wrap" AcceptsReturn="True" 
                                      GotFocus="LeftTextBox_Focused"/>
+                        </StackPanel>
                         <CheckBox x:Name="cs" Margin="5" Content="忽略大小写"/>
                         <CheckBox x:Name="ml" Margin="5" Content="多行模式"/>
                         <CheckBox x:Name="sl" Margin="5" Content="单行模式"/>
                         <CheckBox x:Name="ib" Margin="5" Content="忽略空白"/>
                         <CheckBox x:Name="vc" Margin="5" Content="显式捕获"/>
-                        <CheckBox x:Name="ShowMatch" Margin="5,13,5,5" Content="展示匹配到的内容"
-                                     Checked="CheckBoxUseBox2_Checked" Unchecked="CheckBoxUseBox2_Unchecked"/>
+                        <Separator/>
+                        <RadioButton x:Name="ReplaceOnly" Margin="5" Content="不展示匹配到的内容"
+                                     Checked="RexCheckBoxUseBox2_Checked"/>
+                        <RadioButton x:Name="ShowMatchAndReplace" Margin="5" Content="展示并替换匹配到的内容"
+                                     Checked="RexCheckBoxUseBox2_Checked"/>
+                        <RadioButton x:Name="ShowMatch" Margin="5" Content="仅展示匹配到的内容"
+                                     Checked="RexCheckBoxUseBox2_Checked" Unchecked="RexCheckBoxUseBox2_UnChecked"/>
                     </StackPanel>
                     <RadioButton x:Name="Rename" Content="文件重命名" Style="{StaticResource RadioStyle}" 
                                      Checked="RadioButton_Checked" Unchecked="RadioButton_Unchecked"/>
@@ -317,6 +326,7 @@
                     <StackPanel x:Name="gPasteHelper" Style="{StaticResource ChildPanel}">
                         <CheckBox x:Name="PasteCycle" Content="循环粘贴" Margin="5"/>
                         <CheckBox x:Name="PasteIgnoreBlank" Content="忽略空行" Margin="5"/>
+                        <Separator/>
                         <TextBlock TextWrapping="Wrap" FontSize="12px" Margin="5,5,5,0">
                                 提示：
                         </TextBlock>
