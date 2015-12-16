@@ -551,7 +551,7 @@ namespace TextEdit
             }
             else if (ShowMatch.IsChecked.Value)
             {
-                T2 = f.UseRegExp(Text1, RexFrom.Text, out T2, GetRexOptions());
+                f.UseRegExp(Text1, RexFrom.Text, out T2, GetRexOptions());
             }
         }
         private void DoTransformList(ref string T1)
