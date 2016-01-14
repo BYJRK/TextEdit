@@ -157,12 +157,18 @@
                                       HorizontalAlignment="Stretch" SelectionChanged="BraIniList_SelectionChanged"
                                       VerticalContentAlignment="Center" HorizontalContentAlignment="Center">
                         </ComboBox>
-                        <CheckBox x:Name="BraV" Content="保留括号" Margin="5" Grid.ColumnSpan="3" Grid.Row="2" 
-                                      HorizontalAlignment="Left" VerticalAlignment="Stretch"/>
-                        <Button Margin="5" Content="交换" Width="50" Grid.ColumnSpan="3" Grid.Row="1" 
+                        <Button Margin="5" Content="交换" Width="50" Grid.ColumnSpan="3" Grid.Row="1"
                                     HorizontalAlignment="Right" Click="Button2_Click" Padding="5" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
-                        <CheckBox x:Name="BraKeep" Content="保留括号中的内容" Margin="5" Grid.ColumnSpan="3" Grid.Row="3" 
+                        <StackPanel Grid.Row="3" Grid.ColumnSpan="3" Margin="3">
+                            <CheckBox x:Name="BraV" Content="保留括号" Margin="5"
+                                      HorizontalAlignment="Left" VerticalAlignment="Stretch"/>
+                            <CheckBox x:Name="BraKeep" Content="保留括号中的内容" Margin="5" Grid.ColumnSpan="3" Grid.Row="3" 
                                       HorizontalAlignment="Left" Checked="CheckBoxUseBox2_Checked" Unchecked="CheckBoxUseBox2_Unchecked"/>
+                            <CheckBox x:Name="BraPair" Content="识别嵌套括号" Margin="5" Grid.ColumnSpan="3" Grid.Row="3" 
+                                      HorizontalAlignment="Left" Checked="BraPair_Checked" Unchecked="BraPair_Unchecked"/>
+                            <TextBlock Name="BraPairNotice" TextWrapping="Wrap" Margin="5" FontSize="10pt" Visibility="Collapsed"
+                                       Text="请注意，在识别括号对的情况下，左右括号内容只能为单个字符！"/>
+                        </StackPanel>
                     </Grid>
                     <RadioButton x:Name="Space" Content="删除空格" Style="{StaticResource RadioStyle}" 
                                      Checked="RadioButton_Checked" Unchecked="RadioButton_Unchecked"/>
@@ -184,6 +190,16 @@
                         <RadioButton x:Name="ExchangeLine" Content="全文逐行顺序调换" Margin="5"/>
                         <RadioButton x:Name="ExchangeLineLetter" Content="逐行逐字顺序调换" Margin="5"/>
                     </WrapPanel>
+                    <RadioButton Name="CopyTimes" Content="复制当前内容" Style="{StaticResource RadioStyle}"
+                                     Checked="RadioButton_Checked" Unchecked="RadioButton_Unchecked"/>
+                    <Grid Name="gCopyTimes" Style="{StaticResource ChildPanel}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="3*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="复制次数：" Margin="3" FontSize="10pt" VerticalAlignment="Center"/>
+                        <TextBox Name="CopyTimeCount" Grid.Column="1" Style="{StaticResource ChildTextBox}" Text="1" HorizontalContentAlignment="Center"/>
+                    </Grid>
                     <RadioButton x:Name="AddByLine" Content="逐行添加内容" Style="{StaticResource RadioStyle}" 
                                      Checked="RadioButton_Checked" Unchecked="RadioButton_Unchecked"/>
                     <Grid x:Name="gAddByLine" Style="{StaticResource ChildPanel}">

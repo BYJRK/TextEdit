@@ -12,6 +12,7 @@ using Microsoft.International.Converters.PinYinConverter;
 using System.Windows.Input;
 using WordEdit;
 using System.Reflection;
+using Microsoft.Win32;
 
 namespace TextEdit
 {
@@ -150,6 +151,7 @@ namespace TextEdit
             Space.IsChecked = false;
             Return.IsChecked = false;
             ExchangePL.IsChecked = false;
+            CopyTimes.IsChecked = false;
             AddByLine.IsChecked = false;
             AddIndex.IsChecked = false;
             Format.IsChecked = false;
@@ -166,6 +168,7 @@ namespace TextEdit
             gSpace.IsEnabled = false;
             gReturn.IsEnabled = false;
             gExchangePL.IsEnabled = false;
+            gCopyTimes.IsEnabled = false;
             gAddByLine.IsEnabled = false;
             gAddIndex.IsEnabled = false;
             gFormat.IsEnabled = false;
@@ -182,6 +185,7 @@ namespace TextEdit
             gSpace.Visibility = Visibility.Collapsed;
             gReturn.Visibility = Visibility.Collapsed;
             gExchangePL.Visibility = Visibility.Collapsed;
+            gCopyTimes.Visibility = Visibility.Collapsed;
             gAddByLine.Visibility = Visibility.Collapsed;
             gAddIndex.Visibility = Visibility.Collapsed;
             gFormat.Visibility = Visibility.Collapsed;
@@ -216,6 +220,8 @@ namespace TextEdit
             RetA.IsChecked = true;
             // 文字顺序调换
             ExchangeAll.IsChecked = true;
+            // 复制当前内容
+            CopyTimeCount.Text = "1";
             // 逐行添加内容
             AddC.Clear();
             AddP.Text = "0";
@@ -322,6 +328,10 @@ namespace TextEdit
                 // 文字顺序调换
                 DoExchangePerLetter(ref newText1);
             }
+            else if (CopyTimes.IsChecked.Value)
+            {
+                DoCopyTimes(ref newText1);
+            }
             else if (AddByLine.IsChecked.Value)
             {
                 // 逐行添加文字
@@ -408,11 +418,12 @@ namespace TextEdit
             T2 = string.Empty;
             if (!BraKeep.IsChecked.Value)
             {
-                T1 = f.RemoveBracket(Text1, BraL.Text, BraR.Text, !BraV.IsChecked.Value);
+                string temp = string.Empty;
+                T1 = f.RemoveBracket(Text1, BraL.Text, BraR.Text, !BraV.IsChecked.Value, ref temp, BraPair.IsChecked.Value);
             }
             else
             {
-                T1 = f.RemoveBracket(Text1, BraL.Text, BraR.Text, !BraV.IsChecked.Value, ref T2);
+                T1 = f.RemoveBracket(Text1, BraL.Text, BraR.Text, !BraV.IsChecked.Value, ref T2, BraPair.IsChecked.Value);
             }
         }
         private void DoRemoveSpace(ref string T1)
@@ -441,6 +452,10 @@ namespace TextEdit
             else if (ExchangeLine.IsChecked.Value) selected = 2;
             else if (ExchangeLineLetter.IsChecked.Value) selected = 3;
             T1 = f.ExchangePerLetter(Text1, selected);
+        }
+        private void DoCopyTimes(ref string T1)
+        {
+            T1 = f.CopyTimes(Text1, CopyTimeCount.Text);
         }
         private void DoAddTextAt(ref string T1)
         {
@@ -840,41 +855,6 @@ namespace TextEdit
 
         #endregion
 
-        // WordEdit.dll中函数的引入
-        #region DllImport
-
-        // （虽然感觉没啥用……）
-        [DllImport("WordEdit.dll")]
-        private static extern string TransformStr(string origin, int type);
-        [DllImport("WordEdit.dll")]
-        private static extern string AddTextAt(string origin, string content, int position, bool ignoreBlank = false);
-        [DllImport("WordEdit.dll")]
-        private static extern string AddFrontIndex(string origin, string left, string right, bool isAligned, bool ignoreBlank = false);
-        [DllImport("WordEdit.dll")]
-        private static extern string RemoveReturn(string origin, bool unlessOnly);
-        [DllImport("WordEdit.dll")]
-        private static extern string RemoveSpace(string origin, bool includeTab, bool frontOnly);
-        [DllImport("WordEdit.dll")]
-        private static extern string RemoveBracket(string origin, string left, string right, bool keepBracket);
-        [DllImport("WordEdit.dll")]
-        private static extern string RemoveBracket(string origin, string left, string right, bool deleteBracket, ref string content);
-        [DllImport("WordEdit.dll")]
-        private static extern string Replace(string origin, string from, string to, bool isCaseSensitive = true);
-        [DllImport("WordEdit.dll")]
-        private static extern string RemoveLines(string origin, int every, int delete);
-        [DllImport("WordEdit.dll")]
-        private static extern string InsertLines(string origin1, string origin2, int every, int insert);
-        [DllImport("WordEdit.dll")]
-        private static extern string SpecialAddTextAt(string origin, string content, string position, bool ignoreBlank = false);
-        [DllImport("WordEdit.dll")]
-        private static extern string UseRegExp(string origin, string from, string to, RegexOptions options);
-        [DllImport("WordEdit.dll")]
-        private static extern string UseRegExp(string origin, string from, string to, out string content, RegexOptions options = RegexOptions.None);
-        [DllImport("WordEdit.dll")]
-        private static extern string ExchangePerLetter(string origin, int style);
-
-        #endregion
-
         // 软件参数相关
         #region Configuration
 
@@ -1079,6 +1059,28 @@ namespace TextEdit
 
         #endregion
 
+        // 软件功能函数
+        #region UsefulFunctions
+
+        // 使用默认浏览器打开网页
+        public bool OpenBrowser(string url)
+        {
+            RegistryKey key = Registry.ClassesRoot.OpenSubKey(@"http\shell\open\command\");
+            string s = key.GetValue("").ToString();
+            string browserpath = null;
+            if (s.StartsWith("\""))
+            {
+                browserpath = s.Substring(1, s.IndexOf('\"', 1) - 1);
+            }
+            else
+            {
+                browserpath = s.Substring(0, s.IndexOf(" "));
+            }
+            return System.Diagnostics.Process.Start(browserpath, url) != null;
+        }
+        
+        #endregion
+
         // 左侧元件的事件
         #region LeftElementEvent
 
@@ -1248,6 +1250,15 @@ namespace TextEdit
             UpdateDisplay();
         }
 
+        // 识别括号对的文字提示
+        private void BraPair_Checked(object sender, RoutedEventArgs e)
+        {
+            BraPairNotice.Visibility = Visibility.Visible;
+        }
+        private void BraPair_Unchecked(object sender, RoutedEventArgs e)
+        {
+            BraPairNotice.Visibility = Visibility.Collapsed;
+        }
         #endregion
 
         // 文件重命名功能
@@ -1261,10 +1272,11 @@ namespace TextEdit
             else
             {
                 Box1.Clear();
-                foreach (string str in fileNameList)
+                for (int i = 0; i < fileNameList.Count - 1; i++)
                 {
-                    Box1.AppendText(Path.GetFileName(str) + Environment.NewLine);
+                    Box1.AppendText(Path.GetFileName(fileNameList[i]) + Environment.NewLine);
                 }
+                Box1.AppendText(Path.GetFileName(fileNameList[fileNameList.Count - 1]));
             }
         }
         private void ClearFileList_Click(object sender, RoutedEventArgs e)
@@ -1387,13 +1399,24 @@ namespace TextEdit
         }
         private void 帮助MenuItem_Click(object sender, RoutedEventArgs e)
         {
-            Help help = new Help(((MenuItem)sender).Header.ToString());
-            help.WindowStartupLocation = WindowStartupLocation.Manual;
-            help.Left = this.Left + 50;
-            help.Top = this.Top + 50;
-            help.Width = this.Width - 100;
-            help.Height = this.Height - 100;
-            help.ShowDialog();
+
+            string header = ((MenuItem)sender).Header.ToString();
+            if (header.StartsWith("帮助"))
+            {
+                OpenBrowser(@"https://www.zybuluo.com/byjr-k/note/262468");
+            }
+            else if (header.StartsWith("版本"))
+            {
+                OpenBrowser(@"https://www.zybuluo.com/byjr-k/note/267993");
+            }
+
+            //Help help = new Help(((MenuItem)sender).Header.ToString());
+            //help.WindowStartupLocation = WindowStartupLocation.Manual;
+            //help.Left = Left + 50;
+            //help.Top = Top + 50;
+            //help.Width = Width - 100;
+            //help.Height = Height - 100;
+            //help.ShowDialog();
         }
         private void 打开MenuItem_Click(object sender, RoutedEventArgs e)
         {

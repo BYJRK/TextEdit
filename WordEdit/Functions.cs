@@ -35,51 +35,15 @@ namespace WordEdit
         /// <param name="left">左括号</param>
         /// <param name="right">右括号</param>
         /// <param name="deleteBracket">是否删除括号</param>
-        /// <returns></returns>
-        public string RemoveBracket(string origin, string left, string right, bool deleteBracket)
-        {
-            if (left.Length > origin.Length || right.Length > origin.Length)
-                return origin;
-            if (left.Length == 0 || right.Length == 0)
-                return origin;
-
-            left = ChangeEscChar(left);
-            right = ChangeEscChar(right);
-
-            string sentence = "";
-            // 使用正则表达式
-            // 如果left、right中有特殊字符，则需要首先进行转换
-            string le = left, ri = right;
-            left = CheckRegExpStyle(left);
-            right = CheckRegExpStyle(right);
-
-            Regex r = new Regex(left + ".*?" + right);
-            if (deleteBracket)
-            {
-                sentence = r.Replace(origin, "");
-            }
-            else
-            {
-                sentence = r.Replace(origin, le + ri);
-            }
-
-            return sentence;
-        }
-
-        /// <summary>
-        /// 关于括号的函数
-        /// </summary>
-        /// <param name="origin">原字符串</param>
-        /// <param name="left">左括号</param>
-        /// <param name="right">右括号</param>
-        /// <param name="deleteBracket">是否删除括号</param>
         /// <param name="content">被保留的括号中的内容（用换行符分开）</param>
         /// <returns></returns>
-        public string RemoveBracket(string origin, string left, string right, bool deleteBracket, ref string content)
+        public string RemoveBracket(string origin, string left, string right, bool deleteBracket, ref string content, bool checkpair)
         {
             if (left.Length > origin.Length || right.Length > origin.Length)
                 return origin;
             if (left.Length == 0 || right.Length == 0)
+                return origin;
+            if (checkpair && (left.Length > 1 || right.Length > 1))
                 return origin;
 
             left = ChangeEscChar(left);
@@ -92,7 +56,13 @@ namespace WordEdit
             left = CheckRegExpStyle(left);
             right = CheckRegExpStyle(right);
 
-            Regex r = new Regex(left + ".*?" + right, RegexOptions.Singleline);
+            Regex r;
+            if (!checkpair)
+                r = new Regex(left + ".*?" + right, RegexOptions.Singleline);
+            else
+                r = new Regex(left + "[^" + left + right + "]*" + "(" + "(" + "(?'d'" + left + "[^" + right + "]*" + right + ")" + "[^"
+                    + left + right + "]*" + ")+" + "(" + "(?'-d'" + right + ")[^" + left + right + "]*)+" + ")*" + "(?(d)(?!)" + ")" + right, RegexOptions.Singleline);
+
             // 比上面的方法多了这一个步骤：保留匹配到的内容
             MatchCollection mc = r.Matches(origin);
             if (mc.Count > 0)
@@ -119,6 +89,29 @@ namespace WordEdit
             }
 
             return sentence;
+        }
+
+        /// <summary>
+        /// 复制当前文本
+        /// </summary>
+        /// <param name="origin">原文本</param>
+        /// <param name="times">复制次数（字符串）</param>
+        /// <returns></returns>
+        public string CopyTimes(string origin, string times)
+        {
+            int result;
+            if (!int.TryParse(times, out result)) return origin;
+            if (result <= 0) return origin;
+            if (origin.Length * result > 50000)
+            {
+                // 此处应该有一个判断，避免复制次数太多
+            }
+            StringBuilder sb = new StringBuilder(origin);
+            for (int i = 0; i < result; i++)
+            {
+                sb.Append(origin);
+            }
+            return sb.ToString();
         }
 
         /// <summary>
@@ -200,12 +193,12 @@ namespace WordEdit
             RegexOptions options = RegexOptions.None)
         {
             content = string.Empty;
-            
+
             string temp = origin;
             try
             {
                 Regex r = new Regex(matching, options);
-                
+
                 MatchCollection mc = r.Matches(temp);
                 if (mc.Count > 0)
                 {
