@@ -8,4 +8,5 @@
   <autoSaveTemp value="True" />
   <showSpeed value="False" />
   <alwaysShowBox2 value="False" />
+  <autoCheckUpdate value="True" />
 </property>

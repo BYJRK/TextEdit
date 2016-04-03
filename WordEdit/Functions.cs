@@ -403,20 +403,12 @@ namespace WordEdit
                 foreach (string str in list)
                 {
                     // 如果忽略空格，则自动跳过
-                    if (ignoreBlank)
+                    if (ignoreBlank && str.Length == 0)
                     {
-                        if (str.Length == 0)
-                        {
-                            newlist.Add(EMPTY);
-                            continue;
-                        }
+                        newlist.Add(EMPTY);
+                        continue;
                     }
-                    int i = 0;
-                    if (position[0] != '-') i = Convert.ToInt32(position);
-                    else i = str.Length - Convert.ToInt32(position.Substring(1, position.Length - 1));
-                    if (i > str.Length) i = str.Length;
-                    if (i < 0) i = 0;
-                    newlist.Add(str.Insert(i, content));
+                    newlist.Add(InsertAt(str, content, position));
                 }
             }
             catch (Exception)
@@ -443,36 +435,36 @@ namespace WordEdit
             List<string> list = SplitByStr(origin, NL, true);
             List<string> list2 = SplitByStr(content, NL, true);
             List<string> newlist = new List<string>();
-            try
-            {
-                for (int ii = 0; ii < list.Count; ii++)
-                {
-                    if (ignoreBlank)
-                    {
-                        if (list[ii].Length == 0)
-                        {
-                            newlist.Add(EMPTY);
-                            continue;
-                        }
-                    }
-                    int i = 0;
-                    if (position[0] != '-') i = Convert.ToInt32(position);
-                    else i = list[ii].Length - Convert.ToInt32(position.Substring(1, position.Length - 1));
-                    if (i > list[ii].Length) i = list[ii].Length;
-                    if (i < 0) i = 0;
 
-                    string insertContent = string.Empty;
-                    if (ii <= list2.Count - 1)
-                        insertContent = list2[ii];
-                    newlist.Add(list[ii].Insert(i, insertContent));
-                }
-            }
-            catch (Exception)
+            int index = 0;
+            foreach (string line in list)
             {
-                return origin;
+                if (ignoreBlank && line.Length == 0)
+                {
+                    newlist.Add(EMPTY);
+                    continue;
+                }
+                if (index < list2.Count)
+                {
+                    newlist.Add(InsertAt(line, list2[index], position));
+                    index++;
+                }
+                else
+                    newlist.Add(line);
             }
 
             return CombineStringList(newlist, NL);
+        }
+
+        private string InsertAt(string origin, string content, string position)
+        {
+            int i = 0;
+            if (position[0] != '-') i = Convert.ToInt32(position);
+            else i = origin.Length - Convert.ToInt32(position.Substring(1, position.Length - 1));
+            if (i > origin.Length) i = origin.Length;
+            if (i < 0) i = 0;
+
+            return origin.Insert(i, content);
         }
 
         /// <summary>
@@ -517,7 +509,7 @@ namespace WordEdit
         }
 
         /// <summary>
-        /// 添加行首序号
+        /// 添加行首序号（弃用。代码留在这儿用来丢人。来大家都看看曾经的我算法写的多蛋疼XD）
         /// </summary>
         /// <param name="origin">原文本</param>
         /// <param name="left">左括号</param>
@@ -578,6 +570,61 @@ namespace WordEdit
             sentence = sentence.Remove(sentence.Length - NL.Length);
 
             return sentence;
+        }
+
+        /// <summary>
+        /// 逐行添加序号
+        /// </summary>
+        /// <param name="origin">原文本</param>
+        /// <param name="left">左括号</param>
+        /// <param name="right">右括号</param>
+        /// <param name="position">插入位置</param>
+        /// <param name="isAligned">是否对其数字</param>
+        /// <param name="ignoreBlank">忽略空行</param>
+        /// <returns></returns>
+        public string AddLineIndex(string origin, string left, string right, string position, string startnumber, bool isAligned, bool ignoreBlank = false)
+        {
+            if (!CheckPositionStyle(position)) return origin;
+            uint start;
+            if (!uint.TryParse(startnumber, out start)) return origin;
+
+            StringBuilder sb = new StringBuilder();
+            List<string> list = SplitByStr(origin, NL, true);
+            int total = list.Count + (int)start - 1;
+            int index = (int)start;
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (ignoreBlank && list[i].Length == 0)
+                    continue;
+                else
+                {
+                    sb.Append(left);
+                    sb.Append(GetIndexNumber(index, total, isAligned));
+                    sb.Append(right);
+                    if (i != list.Count - 1)
+                    {
+                        sb.Append(NL);
+                    }
+                    index++;
+                }
+            }
+            return SpecialAddTextAt(origin, sb.ToString(), position, ignoreBlank);
+        }
+
+        private string GetIndexNumber(int index, int total, bool isAligned)
+        {
+            if (index > total)
+                return string.Empty;
+            string str = index.ToString();
+            if (isAligned)
+            {
+                int length = total.ToString().Length;
+                while (str.Length < length)
+                {
+                    str = "0" + str;
+                }
+            }
+            return str;
         }
 
         /// <summary>

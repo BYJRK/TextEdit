@@ -1,6 +1,6 @@
 ﻿<Window x:Class="TextEdit.Configuration"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Height="330" Width="270" WindowStyle="ToolWindow" Title="配置" 
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Height="375" Width="270" WindowStyle="ToolWindow" Title="配置" 
         ScrollViewer.HorizontalScrollBarVisibility="Auto" ResizeMode="CanResize" Closed="Window_Closed" FontFamily="Microsoft Yahei"
         MinWidth="270" MaxWidth="270" MinHeight="300">
     <Window.Resources>
@@ -61,6 +61,7 @@
                         <ComboBoxItem>20</ComboBoxItem>
                     </ComboBox>
                 </WrapPanel>
+                <CheckBox x:Name="autoCheckUpdate" Content="自动检查更新" Style="{StaticResource CheckBoxStyle}"/>
                 <CheckBox x:Name="clearAfterCopy" Content="复制后自动清空文本区域" Style="{StaticResource CheckBoxStyle}"/>
                 <CheckBox x:Name="clearAfterUse" Content="切换功能后自动重置" Style="{StaticResource CheckBoxStyle}"/>
                 <CheckBox x:Name="autoSaveTemp" Content="关闭时保存缓存文本" Style="{StaticResource CheckBoxStyle}"/>

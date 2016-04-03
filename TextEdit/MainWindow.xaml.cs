@@ -13,6 +13,8 @@ using System.Windows.Input;
 using WordEdit;
 using System.Reflection;
 using Microsoft.Win32;
+using System.Net;
+using System.Threading;
 
 namespace TextEdit
 {
@@ -46,7 +48,7 @@ namespace TextEdit
                 Text1 = r.ReadToEnd();
                 r.Dispose();
                 // 从此（2015-7-14），temp文件再也不用了，改为temp1和temp2
-                // 并没有直接无视之前的temp文件，是为了让用户少操心，去主动删除temp（……）
+                // 并没有直接无视之前的temp文件，是为了让用户少操心，去主动删除temp
                 File.Delete("temp.txt");
             }
             if (File.Exists("temp1.txt"))
@@ -65,6 +67,14 @@ namespace TextEdit
             LoadTransformLists();
             // 初始化常见括号对列表
             BraListInitialize();
+
+            // 如果设置了自动检查更新，则检查最新版
+            if (autoCheckUpdate)
+            {
+                Thread t = new Thread(CheckLatestVersion2);
+                t.Start();
+                t.Join();
+            }
 
             OnSourceInitialized(null);
         }
@@ -339,8 +349,8 @@ namespace TextEdit
             }
             else if (AddIndex.IsChecked.Value)
             {
-                // 段首添加数字
-                DoAddFrontIndex(ref newText1);
+                // 逐行添加序号
+                DoAddLineIndex(ref newText1);
             }
             else if (Format.IsChecked.Value)
             {
@@ -440,10 +450,6 @@ namespace TextEdit
             {
                 T1 = f.RemoveReturn(Text1, true);
             }
-            else if (RetR.IsChecked.Value)
-            {
-                T1 = f.UseRegExp(Text1, @"(?<!\r)\n", "\r\n");
-            }
         }
         private void DoExchangePerLetter(ref string T1)
         {
@@ -461,9 +467,9 @@ namespace TextEdit
         {
             T1 = f.AddTextAt(Text1, AddC.Text, AddP.Text, AddIgnoreB.IsChecked.Value);
         }
-        private void DoAddFrontIndex(ref string T1)
+        private void DoAddLineIndex(ref string T1)
         {
-            T1 = f.AddFrontIndex(Text1, AddIndexL.Text, AddIndexR.Text,
+            T1 = f.AddLineIndex(Text1, AddIndexL.Text, AddIndexR.Text, AddIndexP.Text, AddIndexS.Text,
                        AddIndexA.IsChecked.Value, AddIndexI.IsChecked.Value);
         }
         private void DoFormatEdit(ref string T1)
@@ -552,7 +558,7 @@ namespace TextEdit
         }
         private void DoSpecialAddTextAt(ref string T1)
         {
-            T1 = f.SpecialAddTextAt(Text1, Text2, SpecialAddP.Text);
+            T1 = f.SpecialAddTextAt(Text1, Text2, SpecialAddP.Text, SpecialIgnoreS.IsChecked.Value);
         }
         private void DoUseRegExp(ref string T1, ref string T2)
         {
@@ -714,6 +720,8 @@ namespace TextEdit
             set { Box2.Text = value; }
         }
 
+        public object RetR { get; private set; }
+
         // 程序中自定义的快捷键
         #region ShortcutSettings
 
@@ -865,6 +873,7 @@ namespace TextEdit
         public bool showSpeed;
         private string version = string.Empty;
         public bool alwaysShowBox2 = false;
+        public bool autoCheckUpdate;
         // 获取参数
         private void ReadConfig()
         {
@@ -892,7 +901,8 @@ namespace TextEdit
             {
                 XmlElement xe0 = (XmlElement)(xn.SelectSingleNode("version"));
                 XmlElement xe0_1 = (XmlElement)(xn.SelectSingleNode("number"));
-                this.Title = "文本编辑器 " + xe0.InnerText + " v" + xe0_1.InnerText;
+                Title = "文本编辑器 " + xe0.InnerText + " v" + xe0_1.InnerText;
+                version = xe0_1.InnerText;
 
                 XmlElement xe1 = (XmlElement)(xn.SelectSingleNode("autoClear"));
                 clearAfterUse = Convert.ToBoolean(xe1.GetAttribute("value"));
@@ -918,10 +928,12 @@ namespace TextEdit
 
                 XmlElement xe7 = (XmlElement)(xn.SelectSingleNode("alwaysShowBox2"));
                 alwaysShowBox2 = Convert.ToBoolean(xe7.GetAttribute("value"));
+
+                XmlElement xe8 = (XmlElement)(xn.SelectSingleNode("autoCheckUpdate"));
+                autoCheckUpdate = Convert.ToBoolean(xe8.GetAttribute("value"));
             }
-            catch (Exception error)
+            catch (Exception)
             {
-                //MessageBox.Show("配置文件内容错误，请删除配置文件，程序会在下次开启时重新生成默认的配置文件。错误原因：\n" + error.Message, "提示");
                 MessageBoxResult result = MessageBox.Show("配置文件内容错误，是否删除原有config文件并重建？", "提示", MessageBoxButton.YesNo);
                 if (result == MessageBoxResult.Yes)
                 {
@@ -977,6 +989,9 @@ namespace TextEdit
 
                 XmlElement AS2 = (XmlElement)(xn.SelectSingleNode("alwaysShowBox2"));
                 AS2.SetAttribute("value", alwaysShowBox2.ToString());
+
+                XmlElement AC2 = (XmlElement)(xn.SelectSingleNode("autoCheckUpdate"));
+                AC2.SetAttribute("value", autoCheckUpdate.ToString());
             }
             catch (Exception error)
             {
@@ -1078,7 +1093,62 @@ namespace TextEdit
             }
             return System.Diagnostics.Process.Start(browserpath, url) != null;
         }
-        
+
+        // 获取最新版软件的版本号
+        public void CheckLatestVersion(bool mode)
+        {
+            // mode = true：如果是最新版，或者网络连接失败，都会给出提示
+            string url = @"https://www.zybuluo.com/byjr-k/note/262468";
+            try
+            {
+                var request = WebRequest.Create(url) as HttpWebRequest;
+                var response = request.GetResponse() as HttpWebResponse;
+                var sr = new StreamReader(response.GetResponseStream());
+                string info = sr.ReadToEnd();
+                sr.Dispose();
+
+                // 最新版：v 2.6.0
+                Regex r = new Regex(@"(?<=最新版：v )\d+\.\d+\.\d+");
+                int latestversion = TransformVersion(r.Match(info).ToString());
+                int currentversion = TransformVersion(version);
+
+                if (latestversion > currentversion)
+                {
+                    MessageBox.Show("文本编辑器有最新版更新，请在帮助中提供的下载地址进行下载。");
+                }
+                else
+                {
+                    if (mode)
+                        MessageBox.Show("您当前使用的是最新版软件。");
+                }
+            }
+            catch (Exception)
+            {
+                // 除非是分享链接出了问题，否则只能是因为无法联网
+                if (mode)
+                    MessageBox.Show("当前网络连接失败，请重试。");
+            }
+        }
+
+        public void CheckLatestVersion2()
+        {
+            CheckLatestVersion(false);
+        }
+
+        // 将版本号换算为整数
+        private int TransformVersion(string version)
+        {
+            Regex r = new Regex(@"\d+");
+            MatchCollection mc = r.Matches(version);
+            if (mc.Count != 3) return -1;
+
+            int A = int.Parse(mc[0].ToString()),
+                B = int.Parse(mc[1].ToString()),
+                C = int.Parse(mc[2].ToString());
+
+            return A * 1000000 + B * 1000 + C;
+        }
+
         #endregion
 
         // 左侧元件的事件
@@ -1417,6 +1487,10 @@ namespace TextEdit
             //help.Width = Width - 100;
             //help.Height = Height - 100;
             //help.ShowDialog();
+        }
+        private void 更新MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            CheckLatestVersion(true);
         }
         private void 打开MenuItem_Click(object sender, RoutedEventArgs e)
         {

@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:wfi ="clr-namespace:System.Windows.Forms.Integration;assembly=WindowsFormsIntegration"
         xmlns:wf ="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
-        Title="文本编辑器" Height="650" Width="950" MinHeight="450" MinWidth="600"
+        Title="文本编辑器" Height="2650" Width="950" MinHeight="450" MinWidth="600"
         Loaded="Window_Loaded" SizeChanged="Window_SizeChanged" WindowStartupLocation="CenterScreen" 
         Background="#FFF0F0F0" Icon="icon.ico" Closed="Window_Closed" FontFamily="Microsoft Yahei">
     <Window.Resources>
@@ -100,6 +100,7 @@
                         <Separator/>
                         <MenuItem Header="帮助(F1)" Click="帮助MenuItem_Click" Margin="0,1" Name="HelpMenuItem"/>
                         <MenuItem Header="版本信息" Click="帮助MenuItem_Click" Margin="0,1"/>
+                        <MenuItem Header="检查更新" Click="更新MenuItem_Click" Margin="0,1"/>
                     </MenuItem>
                     <MenuItem x:Name="wordCount" Header="字数统计" HorizontalAlignment="Center" Click="统计MenuItem_Click"/>
                 </Menu>
@@ -135,7 +136,7 @@
                         <Button Margin="5" Content="交换" Width="50" Grid.ColumnSpan="3" Grid.Row="1" HorizontalAlignment="Right" 
                                     Click="Button1_Click" Padding="5" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
                     </Grid>
-                    <RadioButton x:Name="Bracket" Content="括号内容" Style="{StaticResource RadioStyle}" 
+                    <RadioButton x:Name="Bracket" Content="括号内容相关" Style="{StaticResource RadioStyle}" 
                                      Checked="RadioButton_Checked" Unchecked="RadioButton_Unchecked"/>
                     <Grid x:Name="gBracket" HorizontalAlignment="Stretch" Style="{StaticResource ChildPanel}">
                         <Grid.ColumnDefinitions>
@@ -170,7 +171,7 @@
                                        Text="请注意，在识别括号对的情况下，左右括号内容只能为单个字符！"/>
                         </StackPanel>
                     </Grid>
-                    <RadioButton x:Name="Space" Content="删除空格" Style="{StaticResource RadioStyle}" 
+                    <RadioButton x:Name="Space" Content="删除所有空格" Style="{StaticResource RadioStyle}" 
                                      Checked="RadioButton_Checked" Unchecked="RadioButton_Unchecked"/>
                     <WrapPanel x:Name="gSpace" Style="{StaticResource ChildPanel}">
                         <CheckBox x:Name="SpaT" Content="包括制表符" Margin="5"/>
@@ -180,8 +181,7 @@
                                      Checked="RadioButton_Checked" Unchecked="RadioButton_Unchecked"/>
                     <StackPanel x:Name="gReturn" Style="{StaticResource ChildPanel}">
                         <RadioButton x:Name="RetA" Content="删除所有换行符" Margin="5"/>
-                        <RadioButton x:Name="RetU" Content="删除多余的换行符" Margin="5"/>
-                        <RadioButton x:Name="RetR" Content="修复换行符错误" Margin="5"/>
+                        <RadioButton x:Name="RetU" Content="删除连续的换行符" Margin="5"/>
                     </StackPanel>
                     <RadioButton x:Name="ExchangePL" Content="文字顺序调换" Style="{StaticResource RadioStyle}" 
                                      Checked="RadioButton_Checked" Unchecked="RadioButton_Unchecked"/>
@@ -190,7 +190,7 @@
                         <RadioButton x:Name="ExchangeLine" Content="全文逐行顺序调换" Margin="5"/>
                         <RadioButton x:Name="ExchangeLineLetter" Content="逐行逐字顺序调换" Margin="5"/>
                     </WrapPanel>
-                    <RadioButton Name="CopyTimes" Content="复制当前内容" Style="{StaticResource RadioStyle}"
+                    <RadioButton Name="CopyTimes" Content="复制当前文本" Style="{StaticResource RadioStyle}"
                                      Checked="RadioButton_Checked" Unchecked="RadioButton_Unchecked"/>
                     <Grid Name="gCopyTimes" Style="{StaticResource ChildPanel}">
                         <Grid.ColumnDefinitions>
@@ -212,11 +212,10 @@
                                       VerticalContentAlignment="Center"/>
                         <Label Margin="5" Grid.Row="1" HorizontalAlignment="Left" Content="插入位置："/>
                         <TextBox x:Name="AddP" Style="{StaticResource ChildTextBox}" Grid.Row="1" HorizontalAlignment="Right" Width="100" 
-                                     Text="0" GotFocus="LeftTextBox_Focused" 
-                                     VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+                                     Text="0" GotFocus="LeftTextBox_Focused" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
                         <CheckBox x:Name="AddIgnoreB" Content="忽略空行" Margin="5" Grid.Row="2"/>
                     </Grid>
-                    <RadioButton x:Name="AddIndex" Content="段首添加序号" Style="{StaticResource RadioStyle}" 
+                    <RadioButton x:Name="AddIndex" Content="逐行添加序号" Style="{StaticResource RadioStyle}" 
                                      Checked="RadioButton_Checked" Unchecked="RadioButton_Unchecked"/>
                     <Grid x:Name="gAddIndex" Style="{StaticResource ChildPanel}">
                         <Grid.ColumnDefinitions>
@@ -227,14 +226,22 @@
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <TextBlock Text="数字" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.ColumnSpan="2" FontSize="15px"/>
                         <TextBox x:Name="AddIndexL" Style="{StaticResource ChildTextBox}" Grid.Row="0" Grid.Column="0" 
                                      HorizontalAlignment="Left" Width="80" GotFocus="LeftTextBox_Focused" VerticalContentAlignment="Center"/>
                         <TextBox x:Name="AddIndexR" Style="{StaticResource ChildTextBox}" Grid.Row="0" Grid.Column="1" 
                                      HorizontalAlignment="Right" Width="80" GotFocus="LeftTextBox_Focused" VerticalContentAlignment="Center"/>
-                        <CheckBox x:Name="AddIndexA" Margin="5" Content="对齐数字" Grid.Row="1" Grid.ColumnSpan="2"/>
-                        <CheckBox x:Name="AddIndexI" Margin="5" Content="忽略空行" Grid.Row="2" Grid.ColumnSpan="2"/>
+                        <Label Margin="5" Grid.Row="1" Content="插入位置："/>
+                        <TextBox x:Name="AddIndexP" Style="{StaticResource ChildTextBox}" Grid.Row="1" Width="100" Grid.Column="1" Text="0"
+                                     GotFocus="LeftTextBox_Focused" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+                        <Label Margin="5" Grid.Row="2" Content="起始值："/>
+                        <TextBox x:Name="AddIndexS" Style="{StaticResource ChildTextBox}" Grid.Row="2" Width="100" Grid.Column="1" Text="1"
+                                     GotFocus="LeftTextBox_Focused" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+                        <CheckBox x:Name="AddIndexA" Margin="5" Content="对齐数字" Grid.Row="3" Grid.ColumnSpan="2"/>
+                        <CheckBox x:Name="AddIndexI" Margin="5" Content="忽略空行" Grid.Row="4" Grid.ColumnSpan="2"/>
                     </Grid>
                     <RadioButton x:Name="Format" Content="文字格式转换" Style="{StaticResource RadioStyle}" 
                                      Checked="RadioButton_Checked" Unchecked="RadioButton_Unchecked"/>
@@ -293,10 +300,17 @@
                     </StackPanel>
                     <RadioButton x:Name="SpecialInsert" Content="特殊插入" Style="{StaticResource RadioStyle}" Checked="RadioButton_Checked"
                                      Unchecked="RadioButton_Unchecked"/>
-                    <StackPanel x:Name="gSpecialInsert" Orientation="Horizontal" Style="{StaticResource ChildPanel}">
-                        <Label Margin="5" Grid.Row="1" HorizontalAlignment="Left" Content="插入位置："/>
-                        <TextBox x:Name="SpecialAddP" Style="{StaticResource ChildTextBox}" Width="80" HorizontalAlignment="Right" Text="0" 
-                                     GotFocus="LeftTextBox_Focused" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+                    <StackPanel x:Name="gSpecialInsert" Style="{StaticResource ChildPanel}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Label Margin="5" HorizontalAlignment="Left" Content="插入位置："/>
+                            <TextBox x:Name="SpecialAddP" Style="{StaticResource ChildTextBox}" Width="80" HorizontalAlignment="Right" Text="0" 
+                                     Grid.Column="1" GotFocus="LeftTextBox_Focused" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+                        </Grid>
+                        <CheckBox x:Name="SpecialIgnoreS" Content="忽略空行" Margin="5" Grid.Row="2"/>
                     </StackPanel>
                     <RadioButton x:Name="Rex" Content="正则表达式" Style="{StaticResource RadioStyle}" Checked="RadioButton_Checked" 
                                      Unchecked="RadioButton_Unchecked"/>

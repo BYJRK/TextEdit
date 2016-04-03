@@ -24,6 +24,7 @@ namespace TextEdit
             if (mainWindow.autoSaveTemp) autoSaveTemp.IsChecked = true;
             if (mainWindow.showSpeed) showSpeed.IsChecked = true;
             if (mainWindow.alwaysShowBox2) alwaysShowBox2.IsChecked = true;
+            if (mainWindow.autoCheckUpdate) autoCheckUpdate.IsChecked = true;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -65,6 +66,7 @@ namespace TextEdit
                 mainWindow.autoSaveTemp = autoSaveTemp.IsChecked.Value;
                 mainWindow.showSpeed = showSpeed.IsChecked.Value;
                 mainWindow.alwaysShowBox2 = alwaysShowBox2.IsChecked.Value;
+                mainWindow.autoCheckUpdate = autoCheckUpdate.IsChecked.Value;
 
                 this.Close();
                 mainWindow.Show();
