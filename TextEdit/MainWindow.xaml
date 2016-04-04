@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:wfi ="clr-namespace:System.Windows.Forms.Integration;assembly=WindowsFormsIntegration"
         xmlns:wf ="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
-        Title="文本编辑器" Height="2650" Width="950" MinHeight="450" MinWidth="600"
+        Title="文本编辑器" Height="650" Width="950" MinHeight="450" MinWidth="600"
         Loaded="Window_Loaded" SizeChanged="Window_SizeChanged" WindowStartupLocation="CenterScreen" 
         Background="#FFF0F0F0" Icon="icon.ico" Closed="Window_Closed" FontFamily="Microsoft Yahei">
     <Window.Resources>
@@ -161,6 +161,7 @@
                         <Button Margin="5" Content="交换" Width="50" Grid.ColumnSpan="3" Grid.Row="1"
                                     HorizontalAlignment="Right" Click="Button2_Click" Padding="5" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
                         <StackPanel Grid.Row="3" Grid.ColumnSpan="3" Margin="3">
+                            <Separator/>
                             <CheckBox x:Name="BraV" Content="保留括号" Margin="5"
                                       HorizontalAlignment="Left" VerticalAlignment="Stretch"/>
                             <CheckBox x:Name="BraKeep" Content="保留括号中的内容" Margin="5" Grid.ColumnSpan="3" Grid.Row="3" 
@@ -207,13 +208,15 @@
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <TextBox x:Name="AddC" Style="{StaticResource ChildTextBox}" Grid.Row="0" GotFocus="LeftTextBox_Focused"
                                       VerticalContentAlignment="Center"/>
                         <Label Margin="5" Grid.Row="1" HorizontalAlignment="Left" Content="插入位置："/>
                         <TextBox x:Name="AddP" Style="{StaticResource ChildTextBox}" Grid.Row="1" HorizontalAlignment="Right" Width="100" 
                                      Text="0" GotFocus="LeftTextBox_Focused" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
-                        <CheckBox x:Name="AddIgnoreB" Content="忽略空行" Margin="5" Grid.Row="2"/>
+                        <Separator Grid.Row="2"/>
+                        <CheckBox x:Name="AddIgnoreB" Content="忽略空行" Margin="5" Grid.Row="3"/>
                     </Grid>
                     <RadioButton x:Name="AddIndex" Content="逐行添加序号" Style="{StaticResource RadioStyle}" 
                                      Checked="RadioButton_Checked" Unchecked="RadioButton_Unchecked"/>
@@ -228,20 +231,22 @@
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                        <TextBlock Text="数字" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.ColumnSpan="2" FontSize="15px"/>
+                        <TextBlock Text="序号" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.ColumnSpan="2" FontSize="15px"/>
                         <TextBox x:Name="AddIndexL" Style="{StaticResource ChildTextBox}" Grid.Row="0" Grid.Column="0" 
                                      HorizontalAlignment="Left" Width="80" GotFocus="LeftTextBox_Focused" VerticalContentAlignment="Center"/>
                         <TextBox x:Name="AddIndexR" Style="{StaticResource ChildTextBox}" Grid.Row="0" Grid.Column="1" 
                                      HorizontalAlignment="Right" Width="80" GotFocus="LeftTextBox_Focused" VerticalContentAlignment="Center"/>
                         <Label Margin="5" Grid.Row="1" Content="插入位置："/>
-                        <TextBox x:Name="AddIndexP" Style="{StaticResource ChildTextBox}" Grid.Row="1" Width="100" Grid.Column="1" Text="0"
+                        <TextBox x:Name="AddIndexP" Style="{StaticResource ChildTextBox}" Grid.Row="1" Grid.Column="1" Text="0"
                                      GotFocus="LeftTextBox_Focused" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
                         <Label Margin="5" Grid.Row="2" Content="起始值："/>
-                        <TextBox x:Name="AddIndexS" Style="{StaticResource ChildTextBox}" Grid.Row="2" Width="100" Grid.Column="1" Text="1"
+                        <TextBox x:Name="AddIndexS" Style="{StaticResource ChildTextBox}" Grid.Row="2" Grid.Column="1" Text="1"
                                      GotFocus="LeftTextBox_Focused" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
-                        <CheckBox x:Name="AddIndexA" Margin="5" Content="对齐数字" Grid.Row="3" Grid.ColumnSpan="2"/>
-                        <CheckBox x:Name="AddIndexI" Margin="5" Content="忽略空行" Grid.Row="4" Grid.ColumnSpan="2"/>
+                        <Separator Grid.Row="3" Grid.ColumnSpan="2"/>
+                        <CheckBox x:Name="AddIndexA" Margin="5" Content="对齐数字" Grid.Row="4" Grid.ColumnSpan="2"/>
+                        <CheckBox x:Name="AddIndexI" Margin="5" Content="忽略空行" Grid.Row="5" Grid.ColumnSpan="2"/>
                     </Grid>
                     <RadioButton x:Name="Format" Content="文字格式转换" Style="{StaticResource RadioStyle}" 
                                      Checked="RadioButton_Checked" Unchecked="RadioButton_Unchecked"/>
@@ -256,7 +261,7 @@
                     <RadioButton x:Name="SymbolTrans" Content="自定义转换列表" Style="{StaticResource RadioStyle}" 
                                      Checked="RadioButton_Checked" Unchecked="RadioButton_Unchecked"/>
                     <StackPanel x:Name="gSymbolTrans" Style="{StaticResource ChildPanel}">
-                        <ComboBox x:Name="SymbolList" Margin="10,5" HorizontalAlignment="Stretch" VerticalContentAlignment="Center">
+                        <ComboBox x:Name="SymbolList" Margin="10,5" HorizontalAlignment="Stretch" VerticalContentAlignment="Center" FontSize="11pt">
                         </ComboBox>
                         <CheckBox x:Name="SymbolDirect" Margin="10" Content="反向替换"/>
                         <Separator/>
@@ -279,6 +284,7 @@
                                          VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
                             <Label Margin="1" Content="行"/>
                         </WrapPanel>
+                        <Separator/>
                         <CheckBox x:Name="KeepRemovedContent" Content="保留被删除的内容" Margin="5"
                                      Checked="CheckBoxUseBox2_Checked" Unchecked="CheckBoxUseBox2_Unchecked"/>
                     </StackPanel>
@@ -310,19 +316,21 @@
                             <TextBox x:Name="SpecialAddP" Style="{StaticResource ChildTextBox}" Width="80" HorizontalAlignment="Right" Text="0" 
                                      Grid.Column="1" GotFocus="LeftTextBox_Focused" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
                         </Grid>
+                        <Separator/>
                         <CheckBox x:Name="SpecialIgnoreS" Content="忽略空行" Margin="5" Grid.Row="2"/>
                     </StackPanel>
                     <RadioButton x:Name="Rex" Content="正则表达式" Style="{StaticResource RadioStyle}" Checked="RadioButton_Checked" 
                                      Unchecked="RadioButton_Unchecked"/>
                     <StackPanel x:Name="gRex" Style="{StaticResource ChildPanel}">
                         <TextBlock Text="匹配内容" HorizontalAlignment="Center" Margin="0,5,0,0"/>
-                        <TextBox x:Name="RexFrom" Margin="5" FontSize="15px" TextWrapping="Wrap" AcceptsReturn="True"
+                        <TextBox x:Name="RexFrom" Margin="5" FontSize="12pt" TextWrapping="Wrap" AcceptsReturn="True"
                                      GotFocus="LeftTextBox_Focused"/>
                         <StackPanel x:Name="RexSecondTextBox" Orientation="Vertical">
                             <TextBlock Text="替换为" HorizontalAlignment="Center"/>
-                            <TextBox x:Name="RexTo" Margin="5" FontSize="15px" TextWrapping="Wrap" AcceptsReturn="True" 
+                            <TextBox x:Name="RexTo" Margin="5" FontSize="12pt" TextWrapping="Wrap" AcceptsReturn="True" 
                                      GotFocus="LeftTextBox_Focused"/>
                         </StackPanel>
+                        <Separator/>
                         <CheckBox x:Name="cs" Margin="5" Content="忽略大小写"/>
                         <CheckBox x:Name="ml" Margin="5" Content="多行模式"/>
                         <CheckBox x:Name="sl" Margin="5" Content="单行模式"/>

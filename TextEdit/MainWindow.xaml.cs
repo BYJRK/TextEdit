@@ -1097,8 +1097,9 @@ namespace TextEdit
         // 获取最新版软件的版本号
         public void CheckLatestVersion(bool mode)
         {
-            // mode = true：如果是最新版，或者网络连接失败，都会给出提示
-            string url = @"https://www.zybuluo.com/byjr-k/note/262468";
+            // mode = true ：如果是最新版，或者网络连接失败，都会给出提示
+            // mode = false：只有发现最新版时，才会给出提示
+            string url = @"https://www.zybuluo.com/byjr-k/note/267993";
             try
             {
                 var request = WebRequest.Create(url) as HttpWebRequest;
@@ -1106,27 +1107,26 @@ namespace TextEdit
                 var sr = new StreamReader(response.GetResponseStream());
                 string info = sr.ReadToEnd();
                 sr.Dispose();
-
-                // 最新版：v 2.6.0
-                Regex r = new Regex(@"(?<=最新版：v )\d+\.\d+\.\d+");
+                
+                Regex r = new Regex(@"(?<=当前最新版：v )\d+\.\d+\.\d+");
                 int latestversion = TransformVersion(r.Match(info).ToString());
                 int currentversion = TransformVersion(version);
 
                 if (latestversion > currentversion)
                 {
-                    MessageBox.Show("文本编辑器有最新版更新，请在帮助中提供的下载地址进行下载。");
+                    MessageBox.Show("文本编辑器有最新版更新，请在帮助中提供的下载地址进行下载。", "提示");
                 }
                 else
                 {
                     if (mode)
-                        MessageBox.Show("您当前使用的是最新版软件。");
+                        MessageBox.Show("您当前使用的是最新版软件。", "提示");
                 }
             }
             catch (Exception)
             {
                 // 除非是分享链接出了问题，否则只能是因为无法联网
                 if (mode)
-                    MessageBox.Show("当前网络连接失败，请重试。");
+                    MessageBox.Show("当前网络连接失败，请重试。", "提示");
             }
         }
 
