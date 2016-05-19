@@ -6,16 +6,12 @@
         Title="文本编辑器" Height="650" Width="950" MinHeight="450" MinWidth="600"
         Loaded="Window_Loaded" SizeChanged="Window_SizeChanged" WindowStartupLocation="CenterScreen" 
         Background="#FFF0F0F0" Icon="icon.ico" Closed="Window_Closed" FontFamily="Microsoft Yahei">
-    <!--程序快捷键-->
     <Window.Resources>
         <RoutedUICommand x:Key="OpenFileShortcut"/>
         <RoutedUICommand x:Key="SettingsShortcut"/>
         <RoutedUICommand x:Key="HelpShortcut"/>
         <RoutedUICommand x:Key="CountShortcut"/>
         <RoutedUICommand x:Key="InitFuncShortcut"/>
-        <RoutedUICommand x:Key="CarryOutFuncShortcut"/>
-        <RoutedUICommand x:Key="UndoShortcut"/>
-        <RoutedUICommand x:Key="CopyToClipboardShortcut"/>
     </Window.Resources>
     <Window.InputBindings>
         <KeyBinding Command="{StaticResource OpenFileShortcut}" Gesture="Ctrl+O"/>
@@ -23,9 +19,6 @@
         <KeyBinding Command="{StaticResource HelpShortcut}" Gesture="F1"/>
         <KeyBinding Command="{StaticResource CountShortcut}" Gesture="Ctrl+E"/>
         <KeyBinding Command="{StaticResource InitFuncShortcut}" Gesture="Ctrl+R"/>
-        <KeyBinding Command="{StaticResource CarryOutFuncShortcut}" Gesture="Ctrl+Enter"/>
-        <KeyBinding Command="{StaticResource UndoShortcut}" Gesture="Ctrl+Shift+Z"/>
-        <KeyBinding Command="{StaticResource CopyToClipboardShortcut}" Gesture="Ctrl+Shift+C"/>
     </Window.InputBindings>
     <Window.CommandBindings>
         <CommandBinding Command="{StaticResource OpenFileShortcut}" Executed="OpenFileShortcutExecuted"/>
@@ -33,9 +26,6 @@
         <CommandBinding Command="{StaticResource HelpShortcut}" Executed="HelpShortcutExecuted"/>
         <CommandBinding Command="{StaticResource CountShortcut}" Executed="CountShortcutExecuted"/>
         <CommandBinding Command="{StaticResource InitFuncShortcut}" Executed="InitFuncShortcutExecuted"/>
-        <CommandBinding Command="{StaticResource CarryOutFuncShortcut}" Executed="CarryOutFuncShortcutExecuted"/>
-        <CommandBinding Command="{StaticResource UndoShortcut}" Executed="UndoShortcutExecuted"/>
-        <CommandBinding Command="{StaticResource CopyToClipboardShortcut}" Executed="CopyToClipboardShortcutExecuted"/>
     </Window.CommandBindings>
     <Grid>
         <Grid.Resources>
@@ -116,18 +106,11 @@
                 </Menu>
                 <!--操作按钮-->
                 <WrapPanel Orientation="Horizontal" HorizontalAlignment="Right" >
-                    <Button Content="执行" Style="{StaticResource MainButton}" Click="Apply_Click"
-                            ToolTip="执行左边选择的功能（快捷键Ctrl+Enter）"/>
-                    <Button x:Name="CancelButton" Content="撤销" Style="{StaticResource MainButton}" IsEnabled="False" Click="Undo_Click"
-                            ToolTip="将下方文本恢复到上次执行前的状态（快捷键Ctrl+Shift+Z）"/>
-                    <Button x:Name="CopyButton" Content="复制" Style="{StaticResource MainButton}" Click="Copy_Click"
-                            ToolTip="将下方文本复制到剪贴板中（快捷键Ctrl+Shift+C）"/>
-                    <Button Content="清空" Style="{StaticResource MainButton}" Click="Clear_Click" Margin="5,2,3,2"
-                            ToolTip="清空下方的两个文本框（无论第二个是否显示）"/>
-                    <Button x:Name="UpsideDownButton" Content="交换" Style="{StaticResource MainButton}" Click="UpsideDown_CLick" Margin="7,2,3,2"
-                            ToolTip="将下方两个文本框的内容互换"/>
-                    <Button x:Name="StopPasteHelper" Content="停止" Style="{StaticResource MainButton}" Click="StopPasteHelper_CLick" Margin="7,2,3,2"
-                            ToolTip="停止剪贴板辅助工具"/>
+                    <Button Content="执行" Style="{StaticResource MainButton}" Click="Apply_Click"/>
+                    <Button x:Name="CancelButton" Content="撤销" Style="{StaticResource MainButton}" IsEnabled="False" Click="Undo_Click"/>
+                    <Button x:Name="CopyButton" Content="复制" Style="{StaticResource MainButton}" Click="Copy_Click"/>
+                    <Button Content="清空" Style="{StaticResource MainButton}" Click="Clear_Click" Margin="5,2,3,2"/>
+                    <Button x:Name="UpsideDownButton" Content="交换" Style="{StaticResource MainButton}" Click="UpsideDown_CLick" Margin="7,2,3,2"/>
                 </WrapPanel>
             </Grid>
         </Border>
@@ -151,8 +134,7 @@
                         <Label Margin="0" Content="->" Grid.Column="1" HorizontalAlignment="Center" VerticalContentAlignment="Center"/>
                         <TextBox x:Name="RepR" Style="{StaticResource ChildTextBox}" Grid.Column="2" GotFocus="LeftTextBox_Focused"/>
                         <Button Margin="5" Content="交换" Width="50" Grid.ColumnSpan="3" Grid.Row="1" HorizontalAlignment="Right" 
-                                    Click="Button1_Click" Padding="5" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
-                                ToolTip="交换左右文本框的内容"/>
+                                    Click="Button1_Click" Padding="5" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
                     </Grid>
                     <RadioButton x:Name="Bracket" Content="括号内容相关" Style="{StaticResource RadioStyle}" 
                                      Checked="RadioButton_Checked" Unchecked="RadioButton_Unchecked"/>
@@ -176,7 +158,7 @@
                                       HorizontalAlignment="Stretch" SelectionChanged="BraIniList_SelectionChanged"
                                       VerticalContentAlignment="Center" HorizontalContentAlignment="Center">
                         </ComboBox>
-                        <Button Margin="5" Content="交换" Width="50" Grid.ColumnSpan="3" Grid.Row="1" ToolTip="交换左右文本框的内容"
+                        <Button Margin="5" Content="交换" Width="50" Grid.ColumnSpan="3" Grid.Row="1"
                                     HorizontalAlignment="Right" Click="Button2_Click" Padding="5" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
                         <StackPanel Grid.Row="3" Grid.ColumnSpan="3" Margin="3">
                             <Separator/>
@@ -372,9 +354,9 @@
                                      ScrollViewer.VerticalScrollBarVisibility="Visible"/>
                         <WrapPanel>
                             <Button x:Name="CopyToRight" Content="拷贝内容到右边" Click="CopyToRight_Click" Padding="5"
-                                        Style="{StaticResource LeftButtonStyle}" ToolTip="将列表中全部文件名（含后缀，不包含文件路径）拷贝至右方"/>
+                                        Style="{StaticResource LeftButtonStyle}"/>
                             <Button x:Name="ClearFileList" Margin="5" Content="清空内容" Click="ClearFileList_Click" Padding="5"
-                                        Style="{StaticResource LeftButtonStyle}" ToolTip="清空上方的文件列表"/>
+                                        Style="{StaticResource LeftButtonStyle}"/>
                         </WrapPanel>
                     </StackPanel>
                     <RadioButton x:Name="PasteHelper" Content="剪贴板辅助工具" Style="{StaticResource RadioStyle}"
@@ -387,7 +369,7 @@
                                 提示：
                         </TextBlock>
                         <TextBlock TextWrapping="Wrap" FontSize="12px" Margin="5,5,5,5">
-                                如果中途想要结束此项功能，请按下右边的停止按钮（清空按钮也可，但是会删除右边的所有文本）
+                                如果中途想要结束此项功能，请按下右边的“清空”按钮
                         </TextBlock>
                     </StackPanel>
                 </StackPanel>

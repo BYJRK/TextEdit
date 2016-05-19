@@ -1,0 +1,44 @@
+﻿<Window x:Class="TextEdit.Help"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Help" Height="600" Width="600" WindowStyle="ToolWindow" MinHeight="300" MinWidth="300" FontFamily="Microsoft Yahei">
+    <Window.Resources>
+        <RoutedUICommand x:Key="EscapeCommand"/>
+    </Window.Resources>
+    <Window.InputBindings>
+        <KeyBinding Command="{StaticResource EscapeCommand}" Gesture="ESC"/>
+    </Window.InputBindings>
+    <Window.CommandBindings>
+        <CommandBinding Command="{StaticResource EscapeCommand}" Executed="CloseWindowByESC"/>
+    </Window.CommandBindings>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid>
+            <TextBox x:Name="Box" Margin="3" IsReadOnly="True" FontSize="15px" TextWrapping="Wrap"
+                 Grid.Row="0" VerticalScrollBarVisibility="Auto">
+                测试文本
+            </TextBox>
+        </Grid>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <WrapPanel>
+                <TextBlock FontSize="14px" Margin="3,0">
+                制作者：拨云见日K
+                </TextBlock>
+                <Button FontSize="14px" Margin="3,0" Background="White" BorderThickness="0" Click="CopyEmail">
+                    邮箱：byjr__k@163.com
+                </Button>
+            </WrapPanel>
+            <Button HorizontalAlignment="Right" Grid.Column="1" Margin="0,3,3,3" Padding="3" Width="60" FontSize="15px"
+                Background="White" Click="Button_Click">
+                <TextBlock>关闭</TextBlock>
+            </Button>
+        </Grid>
+    </Grid>
+</Window>
