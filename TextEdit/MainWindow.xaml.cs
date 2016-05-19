@@ -1118,20 +1118,22 @@ namespace TextEdit
         #region UsefulFunctions
 
         // 使用默认浏览器打开网页
-        public bool OpenBrowser(string url)
+        public void OpenBrowser(string url)
         {
-            RegistryKey key = Registry.ClassesRoot.OpenSubKey(@"http\shell\open\command\");
-            string s = key.GetValue("").ToString();
-            string browserpath = null;
-            if (s.StartsWith("\""))
-            {
-                browserpath = s.Substring(1, s.IndexOf('\"', 1) - 1);
-            }
-            else
-            {
-                browserpath = s.Substring(0, s.IndexOf(" "));
-            }
-            return System.Diagnostics.Process.Start(browserpath, url) != null;
+            //RegistryKey key = Registry.ClassesRoot.OpenSubKey(@"http\shell\open\command\");
+            //string s = key.GetValue("").ToString();
+            //string browserpath = null;
+            //if (s.StartsWith("\""))
+            //{
+            //    browserpath = s.Substring(1, s.IndexOf('\"', 1) - 1);
+            //}
+            //else
+            //{
+            //    browserpath = s.Substring(0, s.IndexOf(" "));
+            //}
+            //return System.Diagnostics.Process.Start(browserpath, url) != null;
+            // 上面的方法在高版本Windows中并不可用，会打开IE，原因不明
+            System.Diagnostics.Process.Start("iexplore.exe", url);
         }
 
         // 获取最新版软件的版本号
