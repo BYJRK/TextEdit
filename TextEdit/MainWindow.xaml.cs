@@ -1092,9 +1092,8 @@ namespace TextEdit
             //    browserpath = s.Substring(0, s.IndexOf(" "));
             //}
             //return System.Diagnostics.Process.Start(browserpath, url) != null;
-
             // 上面的方法在高版本Windows中并不可用，会打开IE，原因不明
-            System.Diagnostics.Process.Start(url);
+            System.Diagnostics.Process.Start("iexplore.exe", url);
         }
 
         // 获取最新版软件的版本号

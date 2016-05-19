@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:wfi ="clr-namespace:System.Windows.Forms.Integration;assembly=WindowsFormsIntegration"
         xmlns:wf ="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
-        Title="文本编辑器" Height="650" Width="950" MinHeight="450" MinWidth="600"
+        Title="文本编辑器" Height="3650" Width="950" MinHeight="450" MinWidth="600"
         Loaded="Window_Loaded" SizeChanged="Window_SizeChanged" WindowStartupLocation="CenterScreen" 
         Background="#FFF0F0F0" Icon="icon.ico" Closed="Window_Closed" FontFamily="Microsoft Yahei">
     <Window.Resources>
