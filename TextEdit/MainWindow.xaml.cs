@@ -76,7 +76,9 @@ namespace TextEdit
                 t.Join();
             }
 
-            OnSourceInitialized(null);
+            // 不知道当时写这句是干啥用的，可能是用来注册全局热键的
+            // 但是本程序的全局热键使用的是键盘钩子，所以删掉也可以
+            //OnSourceInitialized(null);
         }
 
         // 程序关闭
@@ -276,10 +278,6 @@ namespace TextEdit
         private bool isUsingBox2 = false;
         public void UpdateDisplay()
         {
-            Window_SizeChanged(this, null);
-        }
-        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
             if (!isUsingBox2 && !alwaysShowBox2)
             {
                 //Box1.Height = this.ActualHeight - 138;
@@ -294,12 +292,29 @@ namespace TextEdit
                 UpsideDownButton.Visibility = Visibility.Visible;
                 lower.Height = new GridLength(1, GridUnitType.Star);
             }
-            // 如果历史记录数量为0，则不显示撤销键
+            // 如果历史记录最大数量为0，则撤销键不显示
             if (historyCount == 0) CancelButton.Visibility = Visibility.Collapsed;
             else CancelButton.Visibility = Visibility.Visible;
+            // 如果历史记录数量为0，则撤销键不可用
+            if (history.Count == 0) CancelButton.IsEnabled = false;
+            else CancelButton.IsEnabled = true;
             // 如果勾选在复制后自动清空，则按钮名称变为剪切
             if (clearAfterCopy) CopyButton.Content = "剪切";
             else CopyButton.Content = "复制";
+            // 如果选择剪贴板辅助工具，则显示停止按钮
+            if (PasteHelper.IsChecked.Value)
+                StopPasteHelper.Visibility = Visibility.Visible;
+            else
+                StopPasteHelper.Visibility = Visibility.Collapsed;
+            // 如果正在进行剪贴板辅助，则停止按钮可以点击
+            if (isUsingPasteHelper)
+                StopPasteHelper.IsEnabled = true;
+            else
+                StopPasteHelper.IsEnabled = false;
+        }
+        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            UpdateDisplay();
         }
 
         // 各功能的函数调用
@@ -625,7 +640,9 @@ namespace TextEdit
             PasteLineIndex = 0;
             PasteLines = f.SplitByStr(Text1, Environment.NewLine, !PasteIgnoreBlank.IsChecked.Value);
 
-            MessageBox.Show("剪贴板辅助工具已启用。\n共采集到文本信息" + PasteLines.Count.ToString() + "行");
+            MessageBox.Show("剪贴板辅助工具已启用，\n共采集到文本信息 " + PasteLines.Count.ToString() + " 行。");
+
+            UpdateDisplay();
         }
 
         #endregion
@@ -638,28 +655,32 @@ namespace TextEdit
         {
             if (isUsingPasteHelper)
             {
+                // 如果按下Ctrl+V
                 if (e.KeyData == (System.Windows.Forms.Keys.V | System.Windows.Forms.Keys.Control))
                 {
                     try
                     {
+                        // 如果还没有粘贴完全部的内容
                         if (PasteLineIndex < PasteLines.Count)
                         {
                             Clipboard.Clear();
                             Clipboard.SetText(PasteLines[PasteLineIndex]);
                         }
+                        // 如果已经粘贴完全部的内容
                         else
                         {
+                            // 如果开启了粘贴循环，则重头开始
                             if (PasteCycle.IsChecked.Value)
                             {
                                 PasteLineIndex = 0;
                                 Clipboard.Clear();
                                 Clipboard.SetText(PasteLines[0]);
                             }
+                            // 否则，关闭剪贴板辅助工具
                             else
                             {
                                 kh.UnHook();
                                 ClearPasteHelper();
-                                Clipboard.Clear();
                                 //MessageBox.Show("剪贴板辅助工具已自动停止");
                             }
                         }
@@ -667,7 +688,7 @@ namespace TextEdit
                         if (PasteLineIndex >= PasteLines.Count && !PasteCycle.IsChecked.Value)
                         {
                             kh.UnHook();
-                            isUsingPasteHelper = false;
+                            ClearPasteHelper();
                             //MessageBox.Show("剪贴板辅助工具已自动停止");
                         }
                     }
@@ -687,6 +708,9 @@ namespace TextEdit
             isUsingPasteHelper = false;
             PasteLineIndex = 0;
             PasteLines.Clear();
+
+            // 用于将停止按钮Disable
+            UpdateDisplay();
         }
 
         #endregion
@@ -745,6 +769,18 @@ namespace TextEdit
         {
             InitFuncMenuItem_Click(this, null);
         }
+        private void CarryOutFuncShortcutExecuted(object sender, ExecutedRoutedEventArgs e)
+        {
+            ApplyFunction();
+        }
+        private void UndoShortcutExecuted(object sender, ExecutedRoutedEventArgs e)
+        {
+            Undo_Click(this, null);
+        }
+        private void CopyToClipboardShortcutExecuted(object sender, ExecutedRoutedEventArgs e)
+        {
+            Copy_Click(this, null);
+        }
 
         #endregion
 
@@ -770,13 +806,12 @@ namespace TextEdit
                 MessageBox.Show("剪贴板辅助工具已手动停止");
             }
         }
-
         // 撤销更改
         private void Undo_Click(object sender, RoutedEventArgs e)
         {
             if (history.Count == 0)
             {
-                MessageBox.Show("当前没有历史记录。", "提示");
+                //MessageBox.Show("当前没有历史记录。", "提示");
                 return;
             }
             else
@@ -784,11 +819,10 @@ namespace TextEdit
                 Text1 = GetLatestHistory();
                 if (history.Count == 0)
                 {
-                    ((Button)sender).IsEnabled = false;
+                    CancelButton.IsEnabled = false;
                 }
             }
         }
-
         // 复制到剪贴板
         private void Copy_Click(object sender, RoutedEventArgs e)
         {
@@ -816,13 +850,22 @@ namespace TextEdit
                 }
             }
         }
-
         // 替换两个Box的内容
         private void UpsideDown_CLick(object sender, RoutedEventArgs e)
         {
             string temp = Text1;
             Text1 = Text2;
             Text2 = temp;
+        }
+        // 停止剪贴板辅助工具
+        private void StopPasteHelper_CLick(object sender, RoutedEventArgs e)
+        {
+            if (isUsingPasteHelper)
+            {
+                ClearPasteHelper();
+                kh.UnHook();
+                MessageBox.Show("剪贴板辅助工具已手动停止");
+            }
         }
 
         #endregion
@@ -846,7 +889,7 @@ namespace TextEdit
                 history.RemoveAt(0);
             }
             history.Add(temp);
-            CancelButton.IsEnabled = true;
+            UpdateDisplay();
         }
         // 获取最新历史记录，并自动清除最新历史记录
         private string GetLatestHistory()
@@ -1092,8 +1135,9 @@ namespace TextEdit
             //    browserpath = s.Substring(0, s.IndexOf(" "));
             //}
             //return System.Diagnostics.Process.Start(browserpath, url) != null;
+
             // 上面的方法在高版本Windows中并不可用，会打开IE，原因不明
-            System.Diagnostics.Process.Start("iexplore.exe", url);
+            System.Diagnostics.Process.Start(url);
         }
 
         // 获取最新版软件的版本号
@@ -1109,7 +1153,7 @@ namespace TextEdit
                 var sr = new StreamReader(response.GetResponseStream());
                 string info = sr.ReadToEnd();
                 sr.Dispose();
-                
+
                 Regex r = new Regex(@"(?<=当前最新版：v )\d+\.\d+\.\d+");
                 int latestversion = TransformVersion(r.Match(info).ToString());
                 int currentversion = TransformVersion(version);
@@ -1243,6 +1287,10 @@ namespace TextEdit
                 isUsingBox2 = true;
                 UpdateDisplay();
             }
+            else if (r.Name == "PasteHelper")
+            {
+                UpdateDisplay();
+            }
 
             // 自动还原默认值
             if (clearAfterUse)
@@ -1284,6 +1332,10 @@ namespace TextEdit
             else if (r.Name == "Rex" && ShowMatch.IsChecked.Value)
             {
                 isUsingBox2 = false;
+                UpdateDisplay();
+            }
+            else if (r.Name == "PasteHelper")
+            {
                 UpdateDisplay();
             }
         }
