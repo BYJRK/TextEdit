@@ -12,7 +12,6 @@ using Microsoft.International.Converters.PinYinConverter;
 using System.Windows.Input;
 using WordEdit;
 using System.Reflection;
-using Microsoft.Win32;
 using System.Net;
 using System.Threading;
 
@@ -31,26 +30,19 @@ namespace TextEdit
         // 引入外部算法
         private WordEdit.Functions f = new WordEdit.Functions();
 
-        // 程序读取
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        // 在程序初始化结束后，进行窗口中元素的初始化
+        private void Window_Initialized(object sender, EventArgs e)
         {
             InitializeElement();
+            InitializeEveryFunction();
             // 读取配置文件
             ReadConfig();
+            InitializeConfigElements();
             // 程序的初始位置以及高度
             InitSizeMenuItem_Click(this, null);
             // 更新界面内各元件的显示
             UpdateDisplay();
             // 载入历史
-            if (File.Exists("temp.txt"))
-            {
-                StreamReader r = new StreamReader("temp.txt");
-                Text1 = r.ReadToEnd();
-                r.Dispose();
-                // 从此（2015-7-14），temp文件再也不用了，改为temp1和temp2
-                // 并没有直接无视之前的temp文件，是为了让用户少操心，去主动删除temp
-                File.Delete("temp.txt");
-            }
             if (File.Exists("temp1.txt"))
             {
                 StreamReader r = new StreamReader("temp1.txt");
@@ -67,6 +59,12 @@ namespace TextEdit
             LoadTransformLists();
             // 初始化常见括号对列表
             BraListInitialize();
+            // 初始化剪贴板辅助工具自动粘贴的按键列表
+            PasteAutoKey.Items.Add("TAB");
+            PasteAutoKey.Items.Add("ENTER");
+            PasteAutoKey.Items.Add("DOWN");
+            PasteAutoKey.Items.Add("NONE");
+            PasteAutoKey.Text = "TAB";
 
             // 如果设置了自动检查更新，则检查最新版
             if (autoCheckUpdate)
@@ -80,7 +78,6 @@ namespace TextEdit
             // 但是本程序的全局热键使用的是键盘钩子，所以删掉也可以
             //OnSourceInitialized(null);
         }
-
         // 程序关闭
         private void Window_Closed(object sender, EventArgs e)
         {
@@ -211,8 +208,6 @@ namespace TextEdit
 
             Box1.Clear();
             Box2.Clear();
-
-            InitializeEveryFunction();
         }
         private void InitializeEveryFunction()
         {
@@ -225,6 +220,8 @@ namespace TextEdit
             BraV.IsChecked = false;
             BraIniList.SelectedIndex = 0;
             BraKeep.IsChecked = false;
+            BraPair.IsChecked = false;
+            BraPairNotice.Visibility = Visibility.Collapsed;
             // 删除空格
             SpaT.IsChecked = false;
             SpaF.IsChecked = false;
@@ -238,11 +235,15 @@ namespace TextEdit
             AddC.Clear();
             AddP.Text = "0";
             AddIgnoreB.IsChecked = false;
-            // 段首添加序号
+            // 逐行添加序号
             AddIndexL.Clear();
             AddIndexR.Clear();
             AddIndexA.IsChecked = false;
             AddIndexI.IsChecked = false;
+            AddIndexP.Text = "0";
+            AddIndexS.Text = "1";
+            AddIndexDigits.Text = "3";
+            AddIndexNumber.IsChecked = true;
             // 文字格式转换
             Format1.IsChecked = true;
             // 自定义转换列表
@@ -257,6 +258,7 @@ namespace TextEdit
             InsertValue2.Text = "1";
             // 特殊插入
             SpecialAddP.Text = "0";
+            SpecialIgnoreS.IsChecked = false;
             // 正则表达式
             RexFrom.Clear();
             RexTo.Clear();
@@ -266,31 +268,62 @@ namespace TextEdit
             ib.IsChecked = false;
             vc.IsChecked = false;
             ReplaceOnly.IsChecked = true;
-            ShowMatch.IsChecked = false;
-            ShowMatchAndReplace.IsChecked = false;
             // 文件重命名 由于功能要求，不能清空此项的内容
             // 剪贴板辅助工具
             PasteCycle.IsChecked = false;
             PasteIgnoreBlank.IsChecked = false;
+            PasteAuto.IsChecked = false;
+            PasteAutoGroup.Visibility = Visibility.Collapsed;
+            PasteAutoDelay.Text = "300";
+            PasteAutoKey.Text = "TAB";
+        }
+        private void InitializeConfigElements()
+        {
+            AutoCheckUpdateCheckBox.IsChecked = autoCheckUpdate;
+            AutoClearAfterCopyCheckBox.IsChecked = clearAfterCopy;
+            AutoResetCheckBox.IsChecked = clearAfterUse;
+            AutoSaveTempCheckBox.IsChecked = autoSaveTemp;
+            ShowTimeCheckBox.IsChecked = showSpeed;
+            ShowBothTextBoxCheckBox.IsChecked = alwaysShowBox2;
+
+            HistoryCountComboBox.Items.Add("5");
+            HistoryCountComboBox.Items.Add("10");
+            HistoryCountComboBox.Items.Add("20");
+            HistoryCountComboBox.Items.Add("50");
+            HistoryCountComboBox.Items.Add("100");
+            HistoryCountComboBox.Text = historyCount.ToString();
         }
 
         // 与界面中两个文本框的显示与否及各自的位置有关
         private bool isUsingBox2 = false;
+        private double LowerGridHeight = 0;
         public void UpdateDisplay()
         {
             if (!isUsingBox2 && !alwaysShowBox2)
             {
-                //Box1.Height = this.ActualHeight - 138;
+                LowerGridHeight = lower.ActualHeight;
                 Box2.Visibility = Visibility.Collapsed;
                 UpsideDownButton.Visibility = Visibility.Collapsed;
+                HorizontalSplitter.Visibility = Visibility.Collapsed;
                 lower.Height = new GridLength(0);
+                middle.Height = new GridLength(0);
+            }
+            else if (Box2.Visibility == Visibility.Collapsed)
+            {
+                Box2.Visibility = Visibility.Visible;
+                UpsideDownButton.Visibility = Visibility.Visible;
+                HorizontalSplitter.Visibility = Visibility.Visible;
+                if (LowerGridHeight > 0)
+                    lower.Height = new GridLength(LowerGridHeight);
+                else
+                {
+                    upper.Height = new GridLength(1, GridUnitType.Star);
+                    lower.Height = new GridLength(1, GridUnitType.Star);
+                }
+                middle.Height = GridLength.Auto;
             }
             else
             {
-                //Box1.Height = Box2.Height = (this.ActualHeight - 156) / 2;
-                Box2.Visibility = Visibility.Visible;
-                UpsideDownButton.Visibility = Visibility.Visible;
-                lower.Height = new GridLength(1, GridUnitType.Star);
             }
             // 如果历史记录最大数量为0，则撤销键不显示
             if (historyCount == 0) CancelButton.Visibility = Visibility.Collapsed;
@@ -308,9 +341,15 @@ namespace TextEdit
                 StopPasteHelper.Visibility = Visibility.Collapsed;
             // 如果正在进行剪贴板辅助，则停止按钮可以点击
             if (isUsingPasteHelper)
+            {
+                PasteNoticeText.Visibility = Visibility.Visible;
                 StopPasteHelper.IsEnabled = true;
+            }
             else
+            {
+                PasteNoticeText.Visibility = Visibility.Collapsed;
                 StopPasteHelper.IsEnabled = false;
+            }
         }
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
@@ -484,8 +523,14 @@ namespace TextEdit
         }
         private void DoAddLineIndex(ref string T1)
         {
+            int digits;
+            bool result = int.TryParse(AddIndexDigits.Text, out digits);
+            int style = 0;
+            if (AddIndexChinese.IsChecked.Value)
+                style = 1;
+            if (!result) return;
             T1 = f.AddLineIndex(Text1, AddIndexL.Text, AddIndexR.Text, AddIndexP.Text, AddIndexS.Text,
-                       AddIndexA.IsChecked.Value, AddIndexI.IsChecked.Value);
+                       AddIndexA.IsChecked.Value, AddIndexI.IsChecked.Value, digits, style);
         }
         private void DoFormatEdit(ref string T1)
         {
@@ -639,9 +684,10 @@ namespace TextEdit
             isUsingPasteHelper = true;
             PasteLineIndex = 0;
             PasteLines = f.SplitByStr(Text1, Environment.NewLine, !PasteIgnoreBlank.IsChecked.Value);
-
+            Clipboard.SetText(PasteLines[PasteLineIndex]);
             MessageBox.Show("剪贴板辅助工具已启用，\n共采集到文本信息 " + PasteLines.Count.ToString() + " 行。");
 
+            // 用来显示停止按钮
             UpdateDisplay();
         }
 
@@ -660,21 +706,19 @@ namespace TextEdit
                 {
                     try
                     {
-                        // 如果还没有粘贴完全部的内容
+                        // 如果还没有循环一遍
                         if (PasteLineIndex < PasteLines.Count)
                         {
-                            Clipboard.Clear();
                             Clipboard.SetText(PasteLines[PasteLineIndex]);
+                            PasteLineIndex++;
                         }
                         // 如果已经粘贴完全部的内容
-                        else
+                        if (PasteLineIndex >= PasteLines.Count)
                         {
                             // 如果开启了粘贴循环，则重头开始
                             if (PasteCycle.IsChecked.Value)
                             {
                                 PasteLineIndex = 0;
-                                Clipboard.Clear();
-                                Clipboard.SetText(PasteLines[0]);
                             }
                             // 否则，关闭剪贴板辅助工具
                             else
@@ -684,17 +728,48 @@ namespace TextEdit
                                 //MessageBox.Show("剪贴板辅助工具已自动停止");
                             }
                         }
-                        PasteLineIndex++;
-                        if (PasteLineIndex >= PasteLines.Count && !PasteCycle.IsChecked.Value)
+
+                    }
+                    catch (Exception err)
+                    {
+                        MessageBox.Show("剪贴板辅助工具出现错误。\n原因：" + err.Message);
+                        kh.UnHook();
+                        ClearPasteHelper();
+                    }
+                    try
+                    {
+                        if (PasteAuto.IsChecked.Value)
                         {
                             kh.UnHook();
-                            ClearPasteHelper();
-                            //MessageBox.Show("剪贴板辅助工具已自动停止");
+                            Thread.Sleep(800);
+                            int delay = int.Parse(PasteAutoDelay.Text) / 2;
+                            string key = "{" + PasteAutoKey.Text + "}";
+                            IsEnabled = false;
+                            Clipboard.SetText(PasteLines[PasteLineIndex]);
+                            while (PasteLineIndex < PasteLines.Count)
+                            {
+                                if (key != "{NONE}")
+                                    System.Windows.Forms.SendKeys.SendWait(key);
+                                Thread.Sleep(delay);
+                                System.Windows.Forms.SendKeys.SendWait("^{V}");
+                                Thread.Sleep(delay);
+                                PasteLineIndex++;
+                                if (PasteLineIndex >= PasteLines.Count)
+                                {
+                                    ClearPasteHelper();
+                                    IsEnabled = true;
+                                    return;
+                                }
+                                Clipboard.SetText(PasteLines[PasteLineIndex]);
+                            }
                         }
                     }
                     catch (Exception err)
                     {
                         MessageBox.Show("剪贴板辅助工具出现错误。\n原因：" + err.Message);
+                        ClearPasteHelper();
+                        IsEnabled = true;
+                        return;
                     }
                 }
             }
@@ -743,8 +818,6 @@ namespace TextEdit
             get { return Box2.Text; }
             set { Box2.Text = value; }
         }
-
-        public object RetR { get; private set; }
 
         // 程序中自定义的快捷键
         #region ShortcutSettings
@@ -870,6 +943,45 @@ namespace TextEdit
 
         #endregion
 
+        // 程序配置选项的相关事件
+        #region ConfigEvents
+
+        // 菜单栏中，关于配置的选项的属性改变
+        private void ConfigBox_Checked(object sender, RoutedEventArgs e)
+        {
+            CheckBox c = sender as CheckBox;
+            bool result = c.IsChecked.Value;
+            switch (c.Name)
+            {
+                case "AutoCheckUpdateCheckBox": autoCheckUpdate = result; break;
+                case "AutoClearAfterCopyCheckBox": clearAfterCopy = result; break;
+                case "AutoResetCheckBox": clearAfterUse = result; break;
+                case "AutoSaveTempCheckBox": autoSaveTemp = result; break;
+                case "ShowTimeCheckBox": showSpeed = result; break;
+                case "ShowBothTextBoxCheckBox": alwaysShowBox2 = result; break;
+            }
+            UpdateDisplay();
+        }
+        private void ConfigBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            ConfigBox_Checked(sender, null);
+        }
+
+        private void HistoryCount_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            int value;
+            if (int.TryParse(HistoryCountComboBox.SelectedItem.ToString(), out value))
+            {
+                historyCount = value;
+            }
+            else
+            {
+                MessageBox.Show(HistoryCountComboBox.SelectedItem.ToString());
+            }
+        }
+
+        #endregion
+
         // 历史记录相关
         #region HistoryFunction
 
@@ -951,11 +1063,7 @@ namespace TextEdit
                 clearAfterUse = Convert.ToBoolean(xe1.GetAttribute("value"));
 
                 XmlElement xe2 = (XmlElement)(xn.SelectSingleNode("memoryCount"));
-                int count = Convert.ToInt32(xe2.GetAttribute("value"));
-                if (count >= 1)
-                    historyCount = count;
-                else
-                    historyCount = 5;
+                historyCount = Convert.ToInt32(xe2.GetAttribute("value"));
 
                 XmlElement xe3 = (XmlElement)(xn.SelectSingleNode("clearAfterCopy"));
                 clearAfterCopy = Convert.ToBoolean(xe3.GetAttribute("value"));
@@ -1160,12 +1268,17 @@ namespace TextEdit
 
                 if (latestversion > currentversion)
                 {
-                    MessageBox.Show("文本编辑器有最新版更新，请在帮助中提供的下载地址进行下载。", "提示");
+                    MessageBox.Show("文本编辑器有最新版更新，您可以使用帮助中提供的下载地址进行下载。", "提示");
+                }
+                else if (latestversion == currentversion)
+                {
+                    if (mode)
+                        MessageBox.Show("您当前使用的是最新版软件，无需更新。", "提示");
                 }
                 else
                 {
                     if (mode)
-                        MessageBox.Show("您当前使用的是最新版软件。", "提示");
+                        MessageBox.Show("您当前使用的最新的内测版。", "提示");
                 }
             }
             catch (Exception)
@@ -1383,6 +1496,48 @@ namespace TextEdit
         {
             BraPairNotice.Visibility = Visibility.Collapsed;
         }
+
+        // 剪贴板辅助工具的自动粘贴功能的设置显示
+        private void PasteAuto_Checked(object sender, RoutedEventArgs e)
+        {
+            PasteAutoGroup.Visibility = Visibility.Visible;
+        }
+        private void PasteAuto_Unchecked(object sender, RoutedEventArgs e)
+        {
+            PasteAutoGroup.Visibility = Visibility.Collapsed;
+        }
+
+        // 中间分割线的双击，隐藏/显示左侧的功能栏
+        private double LeftToolBarWidth = 0;
+        private void VerticalSplitter_DoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (LeftToolBar.Width.Value > 0)
+            {
+                LeftToolBarWidth = LeftToolBar.Width.Value;
+                LeftToolBar.MinWidth = 0;
+                LeftToolBar.MaxWidth = 0;
+                LeftToolBar.Width = new GridLength(0);
+            }
+            else
+            {
+                LeftToolBar.Width = new GridLength(LeftToolBarWidth);
+                LeftToolBar.MinWidth = 220;
+                LeftToolBar.MaxWidth = 360;
+            }
+        }
+
+        // 逐行插入序号的对齐数字复选框控制显示或隐藏相应功能
+        private void AddIndexAlign_Checked(object sender, RoutedEventArgs e)
+        {
+            AddIndexDigitsTextBlock.Visibility = Visibility.Visible;
+            AddIndexDigits.Visibility = Visibility.Visible;
+        }
+        private void AddIndexAlign_Unchecked(object sender, RoutedEventArgs e)
+        {
+            AddIndexDigitsTextBlock.Visibility = Visibility.Collapsed;
+            AddIndexDigits.Visibility = Visibility.Collapsed;
+        }
+
         #endregion
 
         // 文件重命名功能
@@ -1619,11 +1774,6 @@ namespace TextEdit
         }
         private void 选项MenuItem_Click(object sender, RoutedEventArgs e)
         {
-            Configuration form = new Configuration(this);
-            form.WindowStartupLocation = WindowStartupLocation.Manual;
-            form.Left = this.Left + 100;
-            form.Top = this.Top + 100;
-            form.ShowDialog();
         }
         private void 统计MenuItem_Click(object sender, RoutedEventArgs e)
         {
@@ -1652,7 +1802,6 @@ namespace TextEdit
                 width = (int)(System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width * 0.65),
                 top = (int)(System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height * 0.08),
                 left = (int)(System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width * 0.175);
-            // 如果小于默认的650*950，则会将大小自动设定为650*950
 
             // 以下内容只是为了让数值好看些，个位数为0，仅此而已
             Height = height / 10 * 10;

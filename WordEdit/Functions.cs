@@ -229,16 +229,12 @@ namespace WordEdit
         public string Transform(string origin, List<string> from, List<string> to, bool direct)
         {
             string temp = origin;
-
             if (from.Count != to.Count) throw new OverflowException("数组长度不相等");
-
             if (!direct) Exchange(ref from, ref to);
-
             for (int i = 0; i < from.Count; i++)
             {
                 temp = Replace(temp, from[i], to[i]);
             }
-
             return temp;
         }
 
@@ -456,17 +452,6 @@ namespace WordEdit
             return CombineStringList(newlist, NL);
         }
 
-        private string InsertAt(string origin, string content, string position)
-        {
-            int i = 0;
-            if (position[0] != '-') i = Convert.ToInt32(position);
-            else i = origin.Length - Convert.ToInt32(position.Substring(1, position.Length - 1));
-            if (i > origin.Length) i = origin.Length;
-            if (i < 0) i = 0;
-
-            return origin.Insert(i, content);
-        }
-
         /// <summary>
         /// 逐字左右交换
         /// </summary>
@@ -579,10 +564,14 @@ namespace WordEdit
         /// <param name="left">左括号</param>
         /// <param name="right">右括号</param>
         /// <param name="position">插入位置</param>
+        /// <param name="startnumber">开始数字</param>
         /// <param name="isAligned">是否对其数字</param>
         /// <param name="ignoreBlank">忽略空行</param>
+        /// <param name="digits">对齐时一共多少位，0表示不考虑</param>
+        /// <param name="style">默认为0，表示阿拉伯数字。1为中文</param>
         /// <returns></returns>
-        public string AddLineIndex(string origin, string left, string right, string position, string startnumber, bool isAligned, bool ignoreBlank = false)
+        public string AddLineIndex(string origin, string left, string right, string position, string startnumber, bool isAligned,
+            bool ignoreBlank = false, int digits = 0, int style = 0)
         {
             if (!CheckPositionStyle(position)) return origin;
             uint start;
@@ -599,7 +588,14 @@ namespace WordEdit
                 else
                 {
                     sb.Append(left);
-                    sb.Append(GetIndexNumber(index, total, isAligned));
+                    if (style == 0)
+                    {
+                        sb.Append(GetIndexNumber(index, total, isAligned, digits));
+                    }
+                    else if (style == 1)
+                    {
+                        sb.Append(GetIndexNumber(index));
+                    }
                     sb.Append(right);
                     if (i != list.Count - 1)
                     {
@@ -609,22 +605,6 @@ namespace WordEdit
                 }
             }
             return SpecialAddTextAt(origin, sb.ToString(), position, ignoreBlank);
-        }
-
-        private string GetIndexNumber(int index, int total, bool isAligned)
-        {
-            if (index > total)
-                return string.Empty;
-            string str = index.ToString();
-            if (isAligned)
-            {
-                int length = total.ToString().Length;
-                while (str.Length < length)
-                {
-                    str = "0" + str;
-                }
-            }
-            return str;
         }
 
         /// <summary>
@@ -724,6 +704,26 @@ namespace WordEdit
             return list;
         }
 
+        /// <summary>
+        /// 用于将被SplitByStr函数拆分后的string列表重新组合为一个完整的string
+        /// </summary>
+        /// <param name="list"></param>
+        /// <param name="separator"></param>
+        /// <returns></returns>
+        public string CombineStringList(List<string> list, string separator = "")
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append(list[0]);
+            for (int i = 1; i < list.Count; i++)
+            {
+                sb.Append(separator);
+                sb.Append(list[i]);
+            }
+
+            return sb.ToString();
+        }
+
         // 内部函数
         #region InternalFunctions
 
@@ -734,7 +734,6 @@ namespace WordEdit
             obj1 = obj2;
             obj2 = temp;
         }
-
         // 从List<string>中删除特定元素（常用于删除空元素）
         private void RemoveItemFromList(List<string> list, string element)
         {
@@ -762,20 +761,6 @@ namespace WordEdit
                     return false;
             }
             return true;
-        }
-        // 用于将被SplitByStr函数拆分后的string列表重新组合为一个完整的string
-        private string CombineStringList(List<string> list, string separator = "")
-        {
-            StringBuilder sb = new StringBuilder();
-
-            sb.Append(list[0]);
-            for (int i = 1; i < list.Count; i++)
-            {
-                sb.Append(separator);
-                sb.Append(list[i]);
-            }
-
-            return sb.ToString();
         }
         // 匹配两个字符串是否相同
         private bool CompareString(string str1, string str2, bool isCaseSensitive = true)
@@ -816,6 +801,80 @@ namespace WordEdit
                 origin = r.Replace(origin, @"\" + s);
             }
             return origin;
+        }
+        // 用于在使用逐行添加序号的时候，根据行号获取相应的序号
+        private string GetIndexNumber(int index, int total, bool isAligned, int digits = 0)
+        {
+            if (index > total)
+                return string.Empty;
+            string str = index.ToString();
+            if (isAligned)
+            {
+                int length = digits;
+                if (digits < total.ToString().Length)
+                    length = total.ToString().Length;
+                while (str.Length < length)
+                {
+                    str = "0" + str;
+                }
+            }
+            return str;
+        }
+        // 用于在使用逐行添加序号的时候，根据行号获取相应的中文大写序号
+        private string GetIndexNumber(int index)
+        {
+            return NumberToChinese(index);
+        }
+        // 用于在单行中的某个位置插入文字
+        private string InsertAt(string origin, string content, string position)
+        {
+            int i = 0;
+            if (position[0] != '-') i = Convert.ToInt32(position);
+            else i = origin.Length - Convert.ToInt32(position.Substring(1, position.Length - 1));
+            if (i > origin.Length) i = origin.Length;
+            if (i < 0) i = 0;
+
+            return origin.Insert(i, content);
+        }
+        // 把一个整数转为大写数字
+        static string NumberToChinese(int value)
+        {
+            bool negative = value < 0;
+            value = Math.Abs(value);
+
+            string temp = "";
+            int part1 = value / 100000000;
+            int part2 = (value - part1 * 100000000) / 10000;
+            int part3 = value % 10000;
+            if (part1 > 0) temp += KiloToChinese(part1) + "亿";
+            if (part2 < 1000 && part1 > 0) temp += "零";
+            if (part2 > 0) temp += KiloToChinese(part2) + "万";
+            else if (part2 == 0 && part1 * part3 > 0) temp += "零";
+            if (part3 < 1000 && part1 * part2 > 0) temp += "零";
+            if (part3 > 0) temp += KiloToChinese(part3);
+
+            if (negative) temp = "负" + temp;
+            return temp;
+        }
+        // 把四位数转为大写数字
+        static string KiloToChinese(int value)
+        {
+            if (value < 0) return "";
+            if (value > 9999) return "";
+            string Cn = "零一二三四五六七八九";
+            string temp = "";
+            int n1 = value / 1000;
+            int n2 = (value - n1 * 1000) / 100;
+            int n3 = (value - n1 * 1000 - n2 * 100) / 10;
+            int n4 = value % 10;
+            if (n1 > 0) temp += Cn[n1] + "千";
+            if (n2 > 0) temp += Cn[n2] + "百";
+            else if (n2 == 0 && n1 > 0 && n3 + n4 > 0) temp += Cn[0];
+            if (n3 > 1) temp += Cn[n3] + "十";
+            else if (n3 == 1) temp += "十";
+            else if (n1 * n2 * n4 > 0 && n3 == 0) temp += Cn[0];
+            if (n4 > 0) temp += Cn[n4];
+            return temp;
         }
 
         #endregion
