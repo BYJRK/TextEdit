@@ -3,8 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:wfi ="clr-namespace:System.Windows.Forms.Integration;assembly=WindowsFormsIntegration"
         xmlns:wf ="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
+        xmlns:drawing="clr-namespace:System.Drawing;assembly=System.Drawing"
         Title="文本编辑器" Height="3650" Width="950" MinHeight="450" MinWidth="600" SizeChanged="Window_SizeChanged" WindowStartupLocation="CenterScreen" Initialized="Window_Initialized"
-        Background="#FFF0F0F0" Icon="icon.ico" Closed="Window_Closed" FontFamily="Microsoft Yahei">
+        Background="White" Icon="icon.ico" Closed="Window_Closed" FontFamily="Microsoft Yahei">
     <!--程序快捷键-->
     <Window.Resources>
         <RoutedUICommand x:Key="OpenFileShortcut"/>
@@ -37,23 +38,50 @@
         <Grid.Resources>
             <!--选择功能的RadioButton的整体样式（未选中）-->
             <Style TargetType="RadioButton" x:Key="RadioStyle">
-                <Setter Property="Margin" Value="3,6"/>
                 <Setter Property="FontSize" Value="15px"/>
                 <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="Margin" Value="0,0,0,0"></Setter>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type RadioButton}">
+                            <BulletDecorator Cursor="Hand">
+                                <Border BorderBrush="#FFE2E2E2" BorderThickness="0" Padding="0" >
+                                    <Grid Name="Container">
+                                        <Border Height="3" Name="RadioMark" VerticalAlignment="Top" Background="#FFCC86DD" Visibility="Hidden" />
+                                        <ContentPresenter Margin="0,2,0,2"  HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Grid>
+
+                                    <Border.Background>
+                                        <SolidColorBrush Color="White"></SolidColorBrush>
+                                    </Border.Background>
+                                </Border>
+                            </BulletDecorator>
+
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="true">
+                                    <Setter TargetName="RadioMark" Property="Visibility" Value="Visible"/>
+                                    <Setter TargetName="Container" Property="Background" Value="#7FF49F9F"></Setter>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
             </Style>
             <!--右侧按钮的样式-->
-            <Style TargetType="Button" x:Key="MainButton">
+            <Style TargetType="Button" x:Key="IconButton">
                 <Setter Property="Margin" Value="5,2"/>
                 <Setter Property="Width" Value="60"/>
                 <Setter Property="Height" Value="26"/>
                 <Setter Property="FontSize" Value="12pt"/>
                 <Setter Property="Background" Value="White"/>
                 <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="TextElement.FontFamily" Value="{DynamicResource MaterialIcons}" />
+                <!--FIXIT: 字体嵌入有问题-->
             </Style>
             <!--RadioButton下方GroupBox的样式-->
             <Style TargetType="Panel" x:Key="ChildPanel">
-                <Setter Property="Margin" Value="1,10,1,10"/>
-                <Setter Property="Background" Value="#669CD8EA"/>
+                <Setter Property="Margin" Value="0,0,0,10"/>
+                <Setter Property="Background" Value="#7FF49F9F"/>
                 <Setter Property="HorizontalAlignment" Value="Stretch"/>
             </Style>
             <!--左侧大多数TextBox的样式-->
@@ -80,13 +108,13 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <!--顶部内容-->
-        <Border Grid.ColumnSpan="3" BorderThickness="0,0,0,3" BorderBrush="#7F0066CC" Panel.ZIndex="1">
-            <Grid>
+        <Border Grid.ColumnSpan="3" BorderThickness="0" Panel.ZIndex="1">
+            <Grid Background="White">
+                <Grid.Effect>
+                    <DropShadowEffect ShadowDepth="0"/>
+                </Grid.Effect>
                 <!--菜单栏-->
-                <Menu Margin="4,4" FontSize="12pt" Width="Auto" HorizontalAlignment="Left" FontFamily="Microsoft Yahei">
-                    <Menu.Background>
-                        <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ControlColorKey}}"/>
-                    </Menu.Background>
+                <Menu Margin="4,4" FontSize="12pt" Width="Auto" HorizontalAlignment="Left" FontFamily="Microsoft Yahei" Background="{x:Null}">
                     <MenuItem Header="文件">
                         <MenuItem Header="打开(O)" Click="打开MenuItem_Click" Margin="0,3"/>
                         <MenuItem Header="打开文件目录" Click="文件目录MenuItem_Click" Margin="0,3"/>
@@ -169,28 +197,28 @@
                         <MenuItem Header="版本信息" Click="帮助MenuItem_Click" Margin="0,3"/>
                         <MenuItem Header="检查更新" Click="更新MenuItem_Click" Margin="0,3"/>
                     </MenuItem>
-                    <MenuItem x:Name="wordCount" Header="字数统计" HorizontalAlignment="Center" Click="统计MenuItem_Click"/>
+                    <MenuItem x:Name="wordCount" Header="字数统计" HorizontalAlignment="Center" Click="统计MenuItem_Click" Background="Transparent"/>
                 </Menu>
                 <!--操作按钮-->
                 <WrapPanel Orientation="Horizontal" HorizontalAlignment="Right" >
-                    <Button Content="执行" Style="{StaticResource MainButton}" Click="Apply_Click"
-                            ToolTip="执行左边选择的功能（快捷键Ctrl+Enter）"/>
-                    <Button x:Name="CancelButton" Content="撤销" Style="{StaticResource MainButton}" IsEnabled="False" Click="Undo_Click"
-                            ToolTip="将下方文本恢复到上次执行前的状态（快捷键Ctrl+Shift+Z）"/>
-                    <Button x:Name="CopyButton" Content="复制" Style="{StaticResource MainButton}" Click="Copy_Click"
-                            ToolTip="将下方文本复制到剪贴板中（快捷键Ctrl+Shift+C）"/>
-                    <Button Content="清空" Style="{StaticResource MainButton}" Click="Clear_Click" Margin="5,2,3,2"
-                            ToolTip="清空下方的两个文本框（无论第二个是否显示）"/>
-                    <Button x:Name="UpsideDownButton" Content="交换" Style="{StaticResource MainButton}" Click="UpsideDown_CLick" Margin="7,2,3,2"
-                            ToolTip="将下方两个文本框的内容互换"/>
-                    <Button x:Name="StopPasteHelper" Content="停止" Style="{StaticResource MainButton}" Click="StopPasteHelper_CLick" Margin="7,2,3,2"
-                            ToolTip="停止剪贴板辅助工具"/>
+                    <Button Content="&#xE037;" Style="{StaticResource IconButton}" Click="Apply_Click"
+                            ToolTip="执行左边选择的功能（快捷键Ctrl+Enter）" BorderBrush="{x:Null}" Background="{x:Null}" Width="26" Foreground="#FF90C738"/>
+                    <Button x:Name="CancelButton" Content="&#xE166;" Style="{StaticResource IconButton}" IsEnabled="False" Click="Undo_Click"
+                            ToolTip="将下方文本恢复到上次执行前的状态（快捷键Ctrl+Shift+Z）" BorderBrush="{x:Null}" Background="{x:Null}" Width="26" Foreground="#FFB887FA"/>
+                    <Button x:Name="CopyButton" Content="&#xE14D;" Style="{StaticResource IconButton}" Click="Copy_Click"
+                            ToolTip="将下方文本复制到剪贴板中（快捷键Ctrl+Shift+C）" BorderBrush="{x:Null}" Background="{x:Null}" Width="26" Foreground="#FFF48E51"/>
+                    <Button Content="&#xE14C;" Style="{StaticResource IconButton}" Click="Clear_Click" Margin="5,2,3,2"
+                            ToolTip="清空下方的两个文本框（无论第二个是否显示）" BorderBrush="{x:Null}" Background="{x:Null}" Width="26" Foreground="#FFCC86DD"/>
+                    <Button x:Name="UpsideDownButton" Content="&#xE0C3;" Style="{StaticResource IconButton}" Click="UpsideDown_CLick" Margin="7,2,3,2"
+                            ToolTip="将下方两个文本框的内容互换" BorderBrush="{x:Null}" Background="{x:Null}" Width="26" Foreground="#FF668EFA"/>
+                    <Button x:Name="StopPasteHelper" Content="&#xE047;" Style="{StaticResource IconButton}" Click="StopPasteHelper_CLick" Margin="7,2,3,2"
+                            ToolTip="停止剪贴板辅助工具" BorderBrush="{x:Null}" Background="{x:Null}" Width="26" Foreground="#FFF44D44"/>
                 </WrapPanel>
             </Grid>
         </Border>
         <!--左侧功能列表-->
         <Grid Grid.Column="0" Grid.Row="1" Width="Auto" HorizontalAlignment="Stretch">
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Background="White">
                 <StackPanel HorizontalAlignment="Stretch" Margin="0,10,0,10">
                     <RadioButton x:Name="Replac" Content="文本替换" Style="{StaticResource RadioStyle}" 
                                      Checked="RadioButton_Checked" Unchecked="RadioButton_Unchecked"/>
@@ -243,7 +271,7 @@
                             <CheckBox x:Name="BraPair" Content="识别嵌套括号" Margin="5" Grid.ColumnSpan="3" Grid.Row="3" 
                                       HorizontalAlignment="Left" Checked="BraPair_Checked" Unchecked="BraPair_Unchecked"/>
                             <TextBlock Name="BraPairNotice" TextWrapping="Wrap" Margin="5" FontSize="10pt"
-                                       Text="请注意，在识别括号对的情况下，左右括号内容只能为单个字符！"/>
+                                       Text="⚠在识别括号对的情况下，左右括号内容只能为单个字符！" Foreground="#FFDE0063"/>
                         </StackPanel>
                     </Grid>
                     <RadioButton x:Name="Space" Content="删除所有空格" Style="{StaticResource RadioStyle}" 
@@ -479,9 +507,9 @@
             </ScrollViewer>
         </Grid>
         <GridSplitter Name="VerticalSplitter" Grid.Column="1" Grid.Row="1" Width="3" HorizontalAlignment="Center" VerticalAlignment="Stretch" 
-                      MouseDoubleClick="VerticalSplitter_DoubleClick"/>
+                      MouseDoubleClick="VerticalSplitter_DoubleClick" Background="#FFCC86DD"/>
         <!--右边文本区域-->
-        <Border Grid.Column="2" Grid.Row="1" BorderThickness="3,0,0,0" BorderBrush="#7F0066CC">
+        <Border Grid.Column="2" Grid.Row="1" BorderThickness="0">
             <Grid x:Name="TextBoxPanel">
                 <Grid.RowDefinitions>
                     <RowDefinition x:Name="upper" Height="*"/>
@@ -490,13 +518,11 @@
                 </Grid.RowDefinitions>
                 <TextBox x:Name="Box1" Margin="3" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" AcceptsReturn="True" 
                      AcceptsTab="True" FontSize="16" TextDecorations="{x:Null}"
-                     TextChanged="TextBoxChanged" Grid.Row="0" AllowDrop="True">
-                    测试文本
-                </TextBox>
-                <GridSplitter Name="HorizontalSplitter" Grid.Row="1" HorizontalAlignment="Stretch" Height="3" Background="#7F0066CC"/>
-                <TextBox x:Name="Box2" Margin="3" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" AcceptsReturn="True" 
+                     TextChanged="TextBoxChanged" Grid.Row="0" AllowDrop="True" Text="我能吞下玻璃而不伤身体。&#xA;I can eat glass and it doesn't hurt me.&#xA;私はガラスを食べられます。それは私を傷つけません。&#xA;1234567890!@#$%^&amp;*()-=" BorderThickness="0" FontFamily="/TextEdit;component/Resources/#Inziu Iosevka SC"/>
+                <GridSplitter Name="HorizontalSplitter" Grid.Row="1" HorizontalAlignment="Stretch" Height="3" Background="#FFCC86DD"/>
+                <TextBox x:Name="Box2" Margin="0" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" AcceptsReturn="True" 
                      AcceptsTab="True" FontSize="16" TextDecorations="{x:Null}"
-                     TextChanged="TextBoxChanged" Grid.Row="2">
+                     TextChanged="TextBoxChanged" Grid.Row="2" BorderThickness="0" Background="#FFCC86DD" Foreground="White" BorderBrush="{x:Null}" FontFamily="/TextEdit;component/Resources/#Inziu Iosevka SC">
                     测试文本
                 </TextBox>
             </Grid>

@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <FontFamily x:Key="MaterialIcons">/Resources/#Material Icons</FontFamily>
     </Application.Resources>
 </Application>
+
