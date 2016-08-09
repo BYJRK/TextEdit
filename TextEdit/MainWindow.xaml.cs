@@ -332,8 +332,8 @@ namespace TextEdit
             if (history.Count == 0) CancelButton.IsEnabled = false;
             else CancelButton.IsEnabled = true;
             // 如果勾选在复制后自动清空，则按钮名称变为剪切
-            if (clearAfterCopy) CopyButton.Content = "剪切";
-            else CopyButton.Content = "复制";
+            if (clearAfterCopy) CopyButton.Content = "";
+            else CopyButton.Content = "";
             // 如果选择剪贴板辅助工具，则显示停止按钮
             if (PasteHelper.IsChecked.Value)
                 StopPasteHelper.Visibility = Visibility.Visible;
@@ -1367,8 +1367,9 @@ namespace TextEdit
             p.Visibility = Visibility.Visible;
             RadioButton r = (RadioButton)sender;
             r.Padding = new Thickness(4, -5, 0, 0);
-            r.FontWeight = FontWeights.Bold;
-            r.FontSize = 18.0;
+            // r.FontWeight = FontWeights.Bold;
+            // r.FontSize = 18.0;
+            // 历史遗留
             r.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#0066CC"));
 
             isUsingBox2 = false;

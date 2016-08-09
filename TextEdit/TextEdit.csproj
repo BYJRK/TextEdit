@@ -123,6 +123,11 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
+    <Resource Include="Resources\inziu-SC-bold.ttc" />
+    <Resource Include="Resources\inziu-SC-bolditalic.ttc" />
+    <Resource Include="Resources\inziu-SC-italic.ttc" />
+    <Resource Include="Resources\inziu-SC-regular.ttc" />
+    <Resource Include="Resources\MaterialIcons-Regular.ttf" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -139,8 +144,8 @@
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
-  </Target>
+  </Target>-->
   <Target Name="AfterBuild">
+    <Copy SourceFiles="$(ProjectDir)Resources\MaterialIcons-Regular.ttf" DestinationFolder="$(TargetDir)" ContinueOnError="true" />
   </Target>
-  -->
 </Project>
