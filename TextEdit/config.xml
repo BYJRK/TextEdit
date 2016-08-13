@@ -1,6 +1,6 @@
 ﻿<property>
   <version>第四版</version>
-  <number>2.8.0</number>
+  <number>2.8.1</number>
   <autoClear value="False" />
   <memoryCount value="10" />
   <clearAfterCopy value="False" />

@@ -60,8 +60,7 @@ namespace WordEdit
             if (!checkpair)
                 r = new Regex(left + ".*?" + right, RegexOptions.Singleline);
             else
-                r = new Regex(left + "[^" + left + right + "]*" + "(" + "(" + "(?'d'" + left + "[^" + right + "]*" + right + ")" + "[^"
-                    + left + right + "]*" + ")+" + "(" + "(?'-d'" + right + ")[^" + left + right + "]*)+" + ")*" + "(?(d)(?!)" + ")" + right, RegexOptions.Singleline);
+                r = new Regex(left + "[^" + left + right + "]*" + "(" + "(" + "(?'d'" + left + "[^" + right + "]*" + right + ")" + "[^" + left + right + "]*" + ")+" + "(" + "(?'-d'" + right + ")[^" + left + right + "]*)+" + ")*" + "(?(d)(?!)" + ")" + right, RegexOptions.Singleline);
 
             // 比上面的方法多了这一个步骤：保留匹配到的内容
             MatchCollection mc = r.Matches(origin);

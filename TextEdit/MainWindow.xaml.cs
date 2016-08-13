@@ -1,19 +1,19 @@
-﻿using System;
+﻿using Microsoft.International.Converters.PinYinConverter;
+using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Windows;
-using System.Windows.Media;
-using System.Runtime.InteropServices;
 using System.IO;
-using System.Xml;
-using System.Windows.Controls;
-using System.Text.RegularExpressions;
-using Microsoft.International.Converters.PinYinConverter;
-using System.Windows.Input;
-using WordEdit;
-using System.Reflection;
 using System.Net;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Xml;
+using WordEdit;
 
 namespace TextEdit
 {
@@ -205,6 +205,11 @@ namespace TextEdit
             gRex.Visibility = Visibility.Collapsed;
             gRename.Visibility = Visibility.Collapsed;
             gPasteHelper.Visibility = Visibility.Collapsed;
+
+            AddIndexDigitsTextBlock.Visibility = Visibility.Collapsed;
+            AddIndexDigits.Visibility = Visibility.Collapsed;
+
+            PasteNoticeText.Visibility = Visibility.Collapsed;
 
             Box1.Clear();
             Box2.Clear();

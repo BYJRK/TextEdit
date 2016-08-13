@@ -67,7 +67,7 @@
                 <Setter Property="HorizontalAlignment" Value="Left"/>
                 <Setter Property="Margin" Value="5"/>
                 <Setter Property="Padding" Value="5,2"/>
-                <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
+                <Setter Property="Background" Value="White"/>
             </Style>
         </Grid.Resources>
         <Grid.ColumnDefinitions>
@@ -207,7 +207,7 @@
                         <TextBlock Text="替换为" Grid.Row="2" HorizontalAlignment="Center"/>
                         <TextBox x:Name="RepR" Style="{StaticResource ChildTextBox}" Grid.Row="3" GotFocus="LeftTextBox_Focused"/>
                         <Button Margin="5,0,5,5" Content="交换" Width="50" Grid.ColumnSpan="3" Grid.Row="4" HorizontalAlignment="Right" 
-                                    Click="Button1_Click" Padding="3" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
+                                    Click="Button1_Click" Padding="3" Background="White"
                                 ToolTip="交换左右文本框的内容"/>
                     </Grid>
                     <RadioButton x:Name="Bracket" Content="括号内容相关" Style="{StaticResource RadioStyle}" 
@@ -233,7 +233,7 @@
                                       VerticalContentAlignment="Center" HorizontalContentAlignment="Center">
                         </ComboBox>
                         <Button Margin="5" Content="交换" Width="50" Grid.ColumnSpan="3" Grid.Row="1" ToolTip="交换左右文本框的内容"
-                                    HorizontalAlignment="Right" Click="Button2_Click" Padding="3" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
+                                    HorizontalAlignment="Right" Click="Button2_Click" Padding="3" Background="White"/>
                         <StackPanel Grid.Row="3" Grid.ColumnSpan="3" Margin="3">
                             <Separator/>
                             <CheckBox x:Name="BraV" Content="保留括号" Margin="5"
@@ -243,7 +243,7 @@
                             <CheckBox x:Name="BraPair" Content="识别嵌套括号" Margin="5" Grid.ColumnSpan="3" Grid.Row="3" 
                                       HorizontalAlignment="Left" Checked="BraPair_Checked" Unchecked="BraPair_Unchecked"/>
                             <TextBlock Name="BraPairNotice" TextWrapping="Wrap" Margin="5" FontSize="10pt"
-                                       Text="请注意，在识别括号对的情况下，左右括号内容只能为单个字符！"/>
+                                       Text="在识别嵌套括号的情况下，左右括号内容只能为单个字符！"/>
                         </StackPanel>
                     </Grid>
                     <RadioButton x:Name="Space" Content="删除所有空格" Style="{StaticResource RadioStyle}" 
@@ -465,7 +465,7 @@
                             <ComboBox Name="PasteAutoKey" Margin="5" Grid.Row="1" Grid.Column="1" Height="26" FontSize="12pt"
                                      ToolTip="常用按键：制表符-TAB；回车键-ENTER；下箭头-DOWN；无动作-NONE" IsEditable="True"/>
                         </Grid>
-                        <StackPanel Name="PasteNoticeText" Visibility="Collapsed">
+                        <StackPanel Name="PasteNoticeText">
                             <Separator/>
                             <TextBlock TextWrapping="Wrap" FontSize="12px" Margin="5,5,5,0">
                                 提示：
